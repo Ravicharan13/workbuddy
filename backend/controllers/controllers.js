@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken")
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const Customer = require("../models/CustomerSignUp");
+
 
 // GENERATING ACCESS TOKEN
 const generateAccessToken = (user) => {
@@ -33,20 +35,30 @@ const generateRefreshToken = async (user) =>{
 
 // WORKER REGISTER API
 exports.register = async (req, res) => {
-  const {email,firstname, lastname, username, password } = req.body;
+  const { email, firstname, lastname, username, password, services } = req.body;
+
   try {
     const userExists = await Worker.findOne({ email });
     if (userExists)
       return res.status(400).json({ message: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await Worker.create({email, firstname, lastname, username, password: hashedPassword });
+
+    const user = await Worker.create({
+      email,
+      firstname,
+      lastname,
+      username,
+      password: hashedPassword,
+      services: Array.isArray(services) ? services : [] // safe check
+    });
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // WORKER LOGIN API
 exports.login = async (req,res) => {
@@ -75,6 +87,34 @@ exports.getAllWorkers = async (req, res) => {
     res.status(200).json(workers);
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+exports.customerRegister = async (req, res) => {
+  const { email, firstname, lastname, username, password } = req.body;
+
+  try {
+    const userExists = await Customer.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: "Customer already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newCustomer = await Customer.create({
+      email,
+      firstname,
+      lastname,
+      username,
+      password: hashedPassword
+    });
+
+    res.status(201).json({ message: "Customer registered successfully" });
+
+  } catch (e) {
+    res.status(500).json({ message: e.message });
   }
 };
 
@@ -107,6 +147,43 @@ exports.updateWorkerProfile = async (req, res) => {
     res.json({ message: "Profile updated successfully", worker: updatedWorker });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+exports.customerLogin = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const customer = await Customer.findOne({ email });
+    if (!customer) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, customer.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Password incorrect" });
+    }
+
+    // Generate token
+    const token = jwt.sign(
+      { id: customer._id, email: customer.email },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: customer._id,
+        email: customer.email,
+        firstname: customer.firstname,
+        lastname: customer.lastname,
+        username: customer.username
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
   }
 };
 

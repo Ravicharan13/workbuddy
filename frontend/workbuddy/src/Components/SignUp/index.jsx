@@ -11,7 +11,7 @@ const SignUp = () => {
     lastname: "",
     username: "",
     password: "",
-    service: []
+    services: []
   });
 
   const handleChange = (e) => {
@@ -23,9 +23,9 @@ const SignUp = () => {
     const { value, checked } = e.target;
     setFormData((prev) => {
       const updatedServices = checked
-        ? [...prev.service, value]
-        : prev.service.filter((s) => s !== value);
-      return { ...prev, service: updatedServices };
+        ? [...prev.services, value]
+        : prev.services.filter((s) => s !== value);
+      return { ...prev, services: updatedServices };
     });
   };
 
@@ -48,8 +48,10 @@ const SignUp = () => {
           lastname: formData.lastname,
           username: formData.username,
           password: formData.password,
-          service: formData.service
+          services: formData.services
         };
+
+    console.log(payload);
 
     try {
       const res = await fetch(url, {
@@ -68,7 +70,7 @@ const SignUp = () => {
           lastname: "",
           username: "",
           password: "",
-          service: []
+          services: []
         });
       } else {
         alert(`❌ ${data.message || "Something went wrong!"}`);
@@ -132,7 +134,7 @@ const SignUp = () => {
                     <input
                       type="checkbox"
                       value={option}
-                      checked={formData.service.includes(option)}
+                      checked={formData.services.includes(option)}
                       onChange={handleServiceChange}
                       className="accent-gray-700"
                     />

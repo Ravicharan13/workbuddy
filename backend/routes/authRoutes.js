@@ -8,7 +8,9 @@ const {
   getAllWorkers,
   updateWorkerProfile,
   sendResetCode,
-  verifyResetCode
+  verifyResetCode,
+  customerRegister,
+   customerLogin
 } = require("../controllers/controllers");
 
 router.post("/register", register);
@@ -17,6 +19,7 @@ router.post("/profileupdate",auth,updateWorkerProfile)
 router.post("/sendresetcode",sendResetCode)
 router.post("/verifyresetcode",auth,verifyResetCode)
 router.get("/all",auth,getAllWorkers)
-
+router.post("/customer/register",customerRegister)
+router.post("/customer/login", customerLogin);
 
 module.exports = router;

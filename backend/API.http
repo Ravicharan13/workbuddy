@@ -51,3 +51,24 @@ Content-Type: application/json
   "code": "536956",
   "newPassword": "NewStrongPassword123"
 }
+
+###
+POST http://localhost:5000/api/auth/customer/register
+Content-Type: application/json
+
+{
+  "email": "customer1@example.com",
+  "firstname": "Naveen",
+  "lastname": "Kumar",
+  "username": "naveencust",
+  "password": "mypassword"
+}
+
+### Customer Login
+POST http://localhost:5000/api/auth/customer/login
+Content-Type: application/json
+
+{
+  "email": "customer1@example.com",
+  "password": "mypassword"
+}
