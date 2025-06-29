@@ -5,11 +5,17 @@ const auth = require("../middleware/middleware")
 const {
   register,
   login,
-  getAllWorkers
+  getAllWorkers,
+  updateWorkerProfile,
+  sendResetCode,
+  verifyResetCode
 } = require("../controllers/controllers");
 
 router.post("/register", register);
 router.post("/login",login)
+router.post("/profileupdate",auth,updateWorkerProfile)
+router.post("/sendresetcode",sendResetCode)
+router.post("/verifyresetcode",auth,verifyResetCode)
 router.get("/all",auth,getAllWorkers)
 
 

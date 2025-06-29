@@ -4,9 +4,11 @@ const workerSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   firstname:    { type: String, required: true },
   lastname: { type: String, required: true },
-  service: { type: String, required: true },
+  service: { type: [String] },
   username: { type: String, required: true },
   password: { type: String, required: true },
+  resetCode: { type: String },
+  resetCodeExpires: { type: Date },
   // New fields
   skills: { type: [String], default: [] },           // Optional, defaults to empty array
   phone: { type: String },                           // Optional

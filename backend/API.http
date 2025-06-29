@@ -1,8 +1,53 @@
 
-POST http://localhost:5000/api/auth/login
-Content-Type: application/json
+# POST http://localhost:5000/api/auth/login
+# Content-Type: application/json
 
-{
-    "email":"jayak0776@gmail.com",
-    "password":"12345678"
-}
+# {
+#     "email":"mrkumar1148@gmail.com",
+#     "password":"12345678"
+# }
+
+GET http://localhost:5000/api/auth/all
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjEyOGFjYjE3NzdhNDNkYzRmMmJmMyIsImVtYWlsIjoibXJrdW1hcjExNDhAZ21haWwuY29tIiwiaWF0IjoxNzUxMTk5MTYwLCJleHAiOjE3NTEyMDAwNjB9.jrOSW78FbW6u8wJ2VJMNI4XrhVk4sp8b9LbaCpfSHoo
+
+
+# POST http://localhost:5000/api/auth/register
+# Content-Type: application/json
+
+# {
+#     "email":"mrkumar1148@gmail.com",
+#     "firstname":"J Kumar",
+#     "lastname":"Gubbala",
+#     "service":["Eletriction"],
+#     "username":"jayakumar",
+#     "password":"12345678"
+# }
+
+# POST http://localhost:5000/api/auth/profileupdate
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjExNmIxMjQzNGMzNDdkMzZlOTY1YSIsImVtYWlsIjoiamF5YWswNzc2QGdtYWlsLmNvbSIsImlhdCI6MTc1MTE5MzMxMywiZXhwIjoxNzUxMTk0MjEzfQ.kq3GMIhXb5d_AkedSMQ_Q_8Qu3a5vJWJpkWC2_-g8qM
+# Content-Type: application/json
+
+# {
+#   "service": ["Electrician", "Plumber"],
+#   "skills": ["Wiring", "Leak Fixing", "Circuit Testing"],
+#   "phone": "9876543210",
+#   "location": "Visakhapatnam"
+# }
+
+
+# POST http://localhost:5000/api/auth/sendresetcode
+# Content-Type: application/json
+
+# {
+#   "email": "mrkumar1148@gmail.com"
+# }
+
+# Post http://localhost:5000/api/auth/verifyresetcode
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjEyOGFjYjE3NzdhNDNkYzRmMmJmMyIsImVtYWlsIjoibXJrdW1hcjExNDhAZ21haWwuY29tIiwiaWF0IjoxNzUxMTk4Nzg5LCJleHAiOjE3NTExOTk2ODl9.sB3IoK9SLL5nRByxJpBfNwS9DCRaP4fxhskus8m0SiU
+# Content-Type: application/json
+
+# {
+#   "email": "mrkumar1148@example.com",
+#   "code": "181862",
+#   "newPassword": "NewStrongPassword123"
+# }
