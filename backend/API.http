@@ -57,11 +57,11 @@ POST http://localhost:5000/api/auth/customer/register
 Content-Type: application/json
 
 {
-  "email": "customer1@example.com",
-  "firstname": "Naveen",
+  "email": "jayakumar.gubbala@gmail.com",
+  "firstname": "Jaya",
   "lastname": "Kumar",
-  "username": "naveencust",
-  "password": "mypassword"
+  "username": "Jaya",
+  "password": "123456"
 }
 
 ### Customer Login
@@ -69,6 +69,46 @@ POST http://localhost:5000/api/auth/customer/login
 Content-Type: application/json
 
 {
-  "email": "customer1@example.com",
-  "password": "mypassword"
+  "email": "jayakumar.gubbala@gmail.com",
+  "password": "123456"
+}
+
+
+###
+POST http://localhost:5000/api/auth/customer/profileupdate
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxMjE1Nzk4LCJleHAiOjE3NTEyMTY2OTh9.AhrY1lFu-lHc9j2w4Zxl9CJ-lHpKO0bVxawBhc3CR9o
+Content-Type: application/json
+
+{
+ "phone":"43567787564",
+ "location":"Rajahmundry"
+}
+
+###
+POST http://localhost:5000/api/auth/customer/getcustomer
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxMjE1Nzk4LCJleHAiOjE3NTEyMTY2OTh9.AhrY1lFu-lHc9j2w4Zxl9CJ-lHpKO0bVxawBhc3CR9o
+Content-Type: application/json
+
+{
+  "email":"customer1@example.com"
+}
+
+###
+POST http://localhost:5000/api/auth/customer/sendresetcode
+Content-Type: application/json
+
+{
+  "email": "jayakumar.gubbala@gmail.com"
+}
+
+
+###
+Post http://localhost:5000/api/auth/customer/verifyresetcode
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxMjE1Nzk4LCJleHAiOjE3NTEyMTY2OTh9.AhrY1lFu-lHc9j2w4Zxl9CJ-lHpKO0bVxawBhc3CR9o
+Content-Type: application/json
+
+{
+  "email": "jayakumar.gubbala@gmail.com",
+  "code": "700897",
+  "newPassword": "NewStrongPassword123"
 }
