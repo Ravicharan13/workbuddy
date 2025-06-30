@@ -5,6 +5,7 @@ import SignUp from "./Components/SignUp";
 import WorkerHome from "./Components/WorkerHomePage/Home";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import PublicRoute from "./Components/PublicRoute";
+import { UserProvider } from "./context/UserContext"; // ✅ import UserProvider
 
 function App() {
   return (
@@ -23,19 +24,19 @@ function App() {
               }
             />
 
-          {/* Protected Route: Worker Dashboard */}
-          <Route
-            path="/worker/home"
-            element={
-              <ProtectedRoute>
-                <WorkerHome />
-              </ProtectedRoute>
-            }
-          />
-
-        </Routes>
-      </div>
-    </Router>
+            {/* Protected Route: Worker Dashboard */}
+            <Route
+              path="/worker/home"
+              element={
+                <ProtectedRoute>
+                  <WorkerHome />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </Router>
+    </UserProvider>
   );
 }
 
