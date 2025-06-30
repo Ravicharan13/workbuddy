@@ -5,7 +5,6 @@ import SignUp from "./Components/SignUp";
 import WorkerHome from "./Components/WorkerHomePage/Home";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import PublicRoute from "./Components/PublicRoute";
-import { UserProvider } from "./context/UserContext";
 
 function App() {
   return (
@@ -37,7 +36,6 @@ function App() {
         </Routes>
       </div>
     </Router>
-    </UserProvider>
   );
 }
 
