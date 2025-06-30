@@ -75,18 +75,25 @@ exports.login = async (req, res) => {
     const worker = await Worker.findOne({ email });
     if (!worker) return res.status(400).json({ message: "Invalid credentials" });
 
-        const isMatch = await bcrypt.compare(password, worker.password);
-        if (!isMatch) return res.status(400).json({message: "Password Incorrect"})
-        
-        const accessToken = generateAccessToken(worker);
-        const refreshToken = await generateRefreshToken(worker)
+    const isMatch = await bcrypt.compare(password, worker.password);
+    if (!isMatch) return res.status(400).json({ message: "Password Incorrect" });
 
-        res.json({accessToken,refreshToken})
+    const accessToken = generateAccessToken(worker);
+    const refreshToken = await generateRefreshToken(worker);
 
-    }catch(err){
-        res.status(500).json({message:err.message})
-    }
-}  
+    // ✅ Send username in response
+    res.json({
+      accessToken,
+      refreshToken,
+      username: worker.username
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
 
 // GETTING ALL WORKERS DETAILS
 exports.getAllWorkers = async (req, res) => {
