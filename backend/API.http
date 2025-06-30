@@ -32,7 +32,7 @@ Content-Type: application/json
 ###
 
 
-# POST http://localhost:5000/api/auth/profileupdate
+# PUT http://localhost:5000/api/auth/profileupdate
 # Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjExNmIxMjQzNGMzNDdkMzZlOTY1YSIsImVtYWlsIjoiamF5YWswNzc2QGdtYWlsLmNvbSIsImlhdCI6MTc1MTE5MzMxMywiZXhwIjoxNzUxMTk0MjEzfQ.kq3GMIhXb5d_AkedSMQ_Q_8Qu3a5vJWJpkWC2_-g8qM
 # Content-Type: application/json
 
@@ -79,18 +79,18 @@ Content-Type: application/json
 
 {
   "email": "jayakumar.gubbala@gmail.com",
-  "password": "123456"
+  "password": "NewStrongPassword123"
 }
 
 
 ###
-POST http://localhost:5000/api/auth/customer/profileupdate
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxMjE1Nzk4LCJleHAiOjE3NTEyMTY2OTh9.AhrY1lFu-lHc9j2w4Zxl9CJ-lHpKO0bVxawBhc3CR9o
+PUT http://localhost:5000/api/auth/customer/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxMjc1MzUzLCJleHAiOjE3NTEyNzYyNTN9.sUdzVF8Z3OojMguecwZVgWgDT5NUiLXQODJmIA6Y_V4
 Content-Type: application/json
 
 {
- "phone":"43567787564",
- "location":"Rajahmundry"
+ "phone":"8919753805",
+ "location":"Hyberabad"
 }
 
 ###

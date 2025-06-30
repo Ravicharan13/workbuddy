@@ -10,13 +10,17 @@ const {
   sendResetCode,
   verifyResetCode,
   customerRegister,
-   customerLogin
+   customerLogin,
+   updateCustomerProfile,
+   sendResetCodeCust,
+   verifyResetCodeCust,
+  getCustomerData
 } = require("../controllers/controllers");
 
 // Worker routes
 router.post("/worker/register", register);   
 router.post("/login", login);
-router.post("/profileupdate", auth, updateWorkerProfile);
+router.put("/profileupdate", auth, updateWorkerProfile);
 router.get("/all", auth, getAllWorkers);
 
 // Password reset (Worker)
@@ -26,7 +30,7 @@ router.post("/verifyresetcode", auth, verifyResetCode);
 // Customer routes
 router.post("/customer/register", customerRegister);
 router.post("/customer/login", customerLogin);
-router.post("/customer/profileupdate",auth, updateCustomerProfile);
+router.put("/customer/profile", auth, updateCustomerProfile);
 router.post("/customer/sendresetcode", sendResetCodeCust);
 router.post("/customer/verifyresetcode",auth, verifyResetCodeCust);
 router.post("/customer/getcustomer",auth, getCustomerData);
