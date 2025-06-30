@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Moon, Sun, Menu, X, CircleUserRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [isDark, setIsDark] = useState(false);
@@ -21,24 +22,24 @@ const Navbar = () => {
           {/* Logo */}
           <div className="text-2xl font-bold text-gray-800 dark:text-white">
             <div className="md:text-2xl text-lg font-bold text-gray-500 tracking-tight">
-                Work<span className="text-gray-800 md:text-3xl text-xl dark:text-white">Buddy</span>
-                </div>
+              Work<span className="text-gray-800 md:text-3xl text-xl dark:text-white">Buddy</span>
+            </div>
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex md:space-x-8 lg:space-x-20  text-sm font-medium">
-            <a href="#" className="text-gray-700 dark:text-gray-300 duration-300 hover:text-gray-500 dark:hover:text-gray-500">Home</a>
-            <a href="#" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Requests</a>
-            <a href="#" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Messages</a>
-            <a href="#" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Earnings</a>
-            <a href="#" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Profile</a>
+          <div className="hidden md:flex md:space-x-8 lg:space-x-20 text-sm font-medium">
+            <Link to="/" className="text-gray-700 dark:text-gray-300 duration-300 hover:text-gray-500 dark:hover:text-gray-500">Home</Link>
+            <Link to="/requests" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Requests</Link>
+            <Link to="/messages" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Messages</Link>
+            <Link to="/earnings" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Earnings</Link>
+            <Link to="/profile" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Profile</Link>
           </div>
 
           {/* Right Side: Theme Toggle + Mobile Menu Button */}
           <div className="flex items-center space-x-4">
-            <div className='flex space-x-0 text-gray-700 dark:text-gray-300'>
-            <CircleUserRound className="w-7 h-6" />
-            <p>User </p>
+            <div className="flex space-x-0 text-gray-700 dark:text-gray-300">
+              <CircleUserRound className="w-7 h-6" />
+              <p>User</p>
             </div>
 
             <button
@@ -59,15 +60,14 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {menuOpen && (
-            <div className="absolute top-16 left-0 w-full bg-white dark:bg-gray-900 shadow-md md:hidden z-50 text-base font-medium space-y-2 px-4 py-4">
-                <a href="#" className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Home</a>
-                <a href="#" className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Requests</a>
-                <a href="#" className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Messages</a>
-                <a href="#" className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Earnings</a>
-                <a href="#" className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Profile</a>
-            </div>
-            )}
-
+          <div className="absolute top-16 left-0 w-full bg-white dark:bg-gray-900 shadow-md md:hidden z-50 text-base font-medium space-y-2 px-4 py-4">
+            <Link to="/" className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Home</Link>
+            <Link to="/requests" className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Requests</Link>
+            <Link to="/messages" className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Messages</Link>
+            <Link to="/earnings" className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Earnings</Link>
+            <Link to="/profile" className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Profile</Link>
+          </div>
+        )}
       </div>
     </nav>
   );

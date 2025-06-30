@@ -1,3 +1,4 @@
+// SignUp.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -37,9 +38,9 @@ const SignUp = () => {
 
   const handleNext = () => {
     if (!formData.email || !formData.password || (!isLogin && (!formData.firstname || !formData.lastname || !formData.confirmPassword))) {
-      alert("❌ Fill all fields before continuing");
+      alert("\u274C Fill all fields before continuing");
     } else if (!isLogin && formData.password !== formData.confirmPassword) {
-      alert("❌ Passwords do not match");
+      alert("\u274C Passwords do not match");
     } else {
       setStep(2);
     }
@@ -85,7 +86,10 @@ const SignUp = () => {
       const data = await res.json();
 
       if (res.ok) {
-        alert(`✅ ${isLogin ? "Login" : "Registration"} successful!`);
+        alert(`\u2705 ${isLogin ? "Login" : "Registration"} successful!`);
+
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
 
         setFormData({
           email: "",
@@ -102,14 +106,14 @@ const SignUp = () => {
           if (isCustomer) {
             navigate("/customer/dashboard");
           } else {
-            navigate("/worker/dashboard");
+            navigate("/worker/home");
           }
         }
       } else {
-        alert(`❌ ${data.message || "Something went wrong!"}`);
+        alert(`\u274C ${data.message || "Something went wrong!"}`);
       }
     } catch (err) {
-      alert("❌ Server error");
+      alert("\u274C Server error");
     }
   };
 

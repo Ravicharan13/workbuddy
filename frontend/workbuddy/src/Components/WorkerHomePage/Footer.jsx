@@ -38,7 +38,7 @@ function Footer() {
         <div>
           <h3 className="font-semibold text-lg mb-3">Contact Us</h3>
           <p className="text-sm mb-2"> Hyderabad, India</p>
-          <p className="text-sm mb-2">+91 9876543210</p>
+          <p className="text-sm mb-2">+91 8074953805</p>
           <p className="text-sm">support@workbuddy.com</p>
         </div>
       </div>
