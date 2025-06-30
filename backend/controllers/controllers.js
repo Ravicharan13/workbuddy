@@ -4,6 +4,8 @@ const RefreshToken = require("../models/RefreshToken");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const Request = require("../models/WorkerCustomerRequest")
+const { v4: uuidv4 } = require("uuid");
 
 // Generate Access Token
 const generateAccessToken = (user) => {
@@ -446,3 +448,175 @@ exports.getCustomerData = async (req,res) => {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// CUSTOMER AND WORKER SERVICE REQUEST APIS
+// CUSTOMER-WORKER REQUEST API
+exports.getCustWorkReq= async (req, res) => {
+  try {
+    const {
+      customerEmail,
+      customerFirstName,
+      customerLastName,
+      phoneNumber,
+      location,
+      serviceWanted,
+      workerEmail,
+      workerFirstName,
+      workerLastName
+    } = req.body;
+
+    // Basic validation
+    if (!customerEmail || !customerFirstName || !customerLastName || !phoneNumber || !location || !serviceWanted || !workerEmail || !workerFirstName || !workerLastName) {
+      return res.status(400).json({ message: "All required fields must be filled." });
+    }
+
+    // Create new request
+    const newRequest = new Request({
+      customerEmail,
+      customerFirstName,
+      customerLastName,
+      phoneNumber,
+      location,
+      serviceWanted,
+      workerEmail,
+      workerFirstName,
+      workerLastName
+    });
+
+    await newRequest.save();
+
+    res.status(201).json({ message: "Request sent successfully", data: newRequest });
+  } catch (err) {
+    console.error("Error sending request:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+
+
+exports.getAll=async(req,res)=>{
+  try{
+    const request = await Request.find()
+    return res.status(200).json(request)
+  }catch(err){
+    return res.status(500).json({message:err.message})
+  }
+}
+
+// Get Particular Worker Records from Request Table
+
+
+exports.getAllByWork=async (req, res) => {
+  try {
+    const workerEmail = req.user.email; 
+    console.log(workerEmail)
+
+    const requests = await Request.find({ workerEmail });
+    console.log({requests})
+
+    res.status(200).json({ success: true, data: requests });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exports.acceptRequest = async (req, res) => {
+  try {
+    const { requestId, workerStatus, workerReason } = req.body;
+    const workerId = req.user.id;
+    console.log(workerStatus,workerReason)
+
+    console.log("🆔 Request ID:", requestId);
+    console.log("👷‍♂️ Worker ID:", workerId);
+    console.log("📌 Status to update:", workerStatus);
+
+    // Validate required fields
+    if (!requestId || !workerStatus) {
+      return res.status(400).json({ message: "Request ID and workerStatus are required" });
+    }
+
+    // Reject case: workerReason is required
+    if (workerStatus === "rejected" && !workerReason) {
+      return res.status(400).json({ message: "workerReason is required when status is rejected" });
+    }
+
+    // Find the worker
+    const worker = await Worker.findById(workerId);
+    if (!worker) {
+      return res.status(404).json({ message: "Worker not found" });
+    }
+
+    // Prepare update fields
+    const updateFields = {
+      workerStatus,
+      workerId: worker._id,
+      workerEmail: worker.email,
+      workerName: `${worker.firstname} ${worker.lastname}`,
+    };
+
+    if (workerStatus === "accepted") {
+      updateFields.chatRoomId = uuidv4();
+    }
+
+    if (workerStatus === "rejected") {
+      updateFields.rejectReason = workerReason;
+    }
+
+    // Update the request
+    const updatedRequest = await Request.findByIdAndUpdate(
+      requestId,
+      updateFields,
+      { new: true }
+    );
+
+    if (!updatedRequest) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    res.status(200).json({
+      message: `Request ${workerStatus} successfully`,
+      data: updatedRequest,
+    });
+  } catch (err) {
+    console.error("Error updating request status:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};

@@ -134,3 +134,61 @@ Content-Type: application/json
   "password": "12345678",
   "services": ["Electrician"]
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// WORKER-CUSTOMER REQUEST APIS
+###
+POST http://localhost:5000/api/auth/workreq
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxMzA3NjIyLCJleHAiOjE3NTEzMDk0MjJ9.Lyx6iB6IQAsgy2fMiMZiQJpWWD0FG43P4XQtvgpZ_7g
+Content-Type: application/json
+
+{
+  
+  "customerEmail": "jayakumar.gubbala@gmail.com",
+  "customerFirstName": "Jaya",
+  "customerLastName": "Kumar",
+  "phoneNumber": "8919753805",
+  "location": "Rjy",
+  "serviceWanted": "Car Mech",
+  "workerEmail":"mrkumar1148@gmail.com",
+  "workerFirstName":"Jaya Kumar",
+  "workerLastName":"Gubbala"
+}
+
+
+// GET ALL PARTICULAR WORKER DETAILS
+###
+GET http://localhost:5000/api/auth/getallwork
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjIxMzIxNTg3ZTFmNmZkYzA3ZThjNSIsImVtYWlsIjoibXJrdW1hcjExNDhAZ21haWwuY29tIiwiaWF0IjoxNzUxMzAzNTU3LCJleHAiOjE3NTEzMDQ0NTd9.aNDRyUbkzDkCUIu5-0yihDrnSGRnhpEspPlg6hLR_jM
+
+
+###
+GET http://localhost:5000/api/auth/getall
+
+
+// ACCEPT REQUEST API BY WORKER
+###
+PUT http://localhost:5000/api/auth/accept
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjIxMzIxNTg3ZTFmNmZkYzA3ZThjNSIsImVtYWlsIjoibXJrdW1hcjExNDhAZ21haWwuY29tIiwiaWF0IjoxNzUxMzAzOTYxLCJleHAiOjE3NTEzMDQ4NjF9._yzgKMZe1nbMYErBaBXEpqm3AAuLXSahz0X-Um17Ndw
+Content-Type: application/json
+
+{
+  "requestId": "6862c56c34c454b6254fbebf",
+  "workerStatus": "accepted"
+}
+

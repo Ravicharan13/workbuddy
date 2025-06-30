@@ -14,7 +14,11 @@ const {
    updateCustomerProfile,
    sendResetCodeCust,
    verifyResetCodeCust,
-  getCustomerData
+  getCustomerData,
+  getCustWorkReq,
+  getAllByWork,
+  getAll,
+  acceptRequest
 } = require("../controllers/controllers");
 
 // Worker routes
@@ -34,4 +38,12 @@ router.put("/customer/profile", auth, updateCustomerProfile);
 router.post("/customer/sendresetcode", sendResetCodeCust);
 router.post("/customer/verifyresetcode",auth, verifyResetCodeCust);
 router.post("/customer/getcustomer",auth, getCustomerData);
+
+
+//WORKER-CUSTOMER REQUEST API'S
+router.post("/workreq",auth,getCustWorkReq)
+router.get("/getallwork",auth,getAllByWork)
+router.get("/getall",getAll)
+router.put("/accept",auth, acceptRequest)
+
 module.exports = router;
