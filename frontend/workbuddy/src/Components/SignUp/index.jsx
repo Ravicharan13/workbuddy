@@ -1,11 +1,13 @@
 // SignUp.jsx
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../../context/UserContext" // updated context hook
 
 const SERVICE_OPTIONS = ["Plumbing", "Electrician", "Carpentry", "Painting", "Cleaning"];
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { setUser } = useUser();
 
   const [isCustomer, setIsCustomer] = useState(true);
   const [isLogin, setIsLogin] = useState(false);
@@ -38,9 +40,9 @@ const SignUp = () => {
 
   const handleNext = () => {
     if (!formData.email || !formData.password || (!isLogin && (!formData.firstname || !formData.lastname || !formData.confirmPassword))) {
-      alert("\u274C Fill all fields before continuing");
+      alert("❌ Fill all fields before continuing");
     } else if (!isLogin && formData.password !== formData.confirmPassword) {
-      alert("\u274C Passwords do not match");
+      alert("❌ Passwords do not match");
     } else {
       setStep(2);
     }
@@ -86,10 +88,12 @@ const SignUp = () => {
       const data = await res.json();
 
       if (res.ok) {
-        alert(`\u2705 ${isLogin ? "Login" : "Registration"} successful!`);
+        alert(`✅ ${isLogin ? "Login" : "Registration"} successful!`);
 
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
+        localStorage.setItem("username", data.username);
+        setUser({ username: data.username });
 
         setFormData({
           email: "",
@@ -110,10 +114,10 @@ const SignUp = () => {
           }
         }
       } else {
-        alert(`\u274C ${data.message || "Something went wrong!"}`);
+        alert(`❌ ${data.message || "Something went wrong!"}`);
       }
     } catch (err) {
-      alert("\u274C Server error");
+      alert("❌ Server error");
     }
   };
 
