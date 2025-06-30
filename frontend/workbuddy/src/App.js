@@ -4,6 +4,8 @@ import SignUp from "./Components/SignUp";
 import WorkerHome from "./Components/WorkerHomePage/Home";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import PublicRoute from "./Components/PublicRoute";
+import { UserProvider } from "./context/UserContext";
+import WorkerRequests from "./Components/WorkerComponents/WorkerRequests"; // ✅ FIXED PATH
 
 function App() {
   return (
@@ -12,7 +14,6 @@ function App() {
         <Navbar />
         <div className="App">
           <Routes>
-            {/* Public Route: Login/Signup at root path */}
             <Route
               path="/"
               element={
@@ -21,20 +22,26 @@ function App() {
                 </PublicRoute>
               }
             />
-
-          {/* Protected Route: Worker Dashboard */}
-          <Route
-            path="/worker/home"
-            element={
-              <ProtectedRoute>
-                <WorkerHome />
-              </ProtectedRoute>
-            }
-          />
-
-        </Routes>
-      </div>
-    </Router>
+            <Route
+              path="/worker/home"
+              element={
+                <ProtectedRoute>
+                  <WorkerHome />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/worker/request"
+              element={
+                <ProtectedRoute>
+                  <WorkerRequests />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </Router>
+    </UserProvider>
   );
 }
 
