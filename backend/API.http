@@ -1,27 +1,36 @@
 
-# POST http://localhost:5000/api/auth/login
-# Content-Type: application/json
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
 
-# {
-#     "email":"mrkumar1148@gmail.com",
-#     "password":"12345678"
-# }
+{
+    "email":"mrkumar1148@gmail.com",
+    "password":"12345678"
+}
+
+###
 
 # GET http://localhost:5000/api/auth/all
 # Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjEzM2ZlYWEwOGU1YmVjOTM3MjdlZSIsImVtYWlsIjoibXJrdW1hcjExNDhAZ21haWwuY29tIiwiaWF0IjoxNzUxMjAwNzc3LCJleHAiOjE3NTEyMDE2Nzd9.oaBwLHUW0fwzVcrQeG4cMawbsRCwEoGqSJVY_CpB7b0
+###
+
+### Register Worker
+### Register Worker
 
 
-# POST http://localhost:5000/api/auth/register
-# Content-Type: application/json
+POST http://localhost:5000/api/auth/worker/register
+Content-Type: application/json
 
-# {
-#     "email":"mrkumar1148@gmail.com",
-#     "firstname":"J Kumar",
-#     "lastname":"Gubbala",
-#     "service":["Eletriction"],
-#     "username":"jayakumar",
-#     "password":"12345678"
-# }
+{
+  "email": "mrkumar1148@gmail.com",
+  "firstname": "J Kumar",
+  "lastname": "Gubbala",
+  "username": "jayakumar",
+  "password": "12345678",
+  "services": ["Electrician"]
+}
+
+###
+
 
 # POST http://localhost:5000/api/auth/profileupdate
 # Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjExNmIxMjQzNGMzNDdkMzZlOTY1YSIsImVtYWlsIjoiamF5YWswNzc2QGdtYWlsLmNvbSIsImlhdCI6MTc1MTE5MzMxMywiZXhwIjoxNzUxMTk0MjEzfQ.kq3GMIhXb5d_AkedSMQ_Q_8Qu3a5vJWJpkWC2_-g8qM
@@ -71,4 +80,17 @@ Content-Type: application/json
 {
   "email": "customer1@example.com",
   "password": "mypassword"
+}
+###
+
+PUT  http://localhost:5000/api/auth/updateWorkerProfile
+Content-Type: application/json
+
+{
+  "email": "mrkumar1148@gmail.com",
+  "firstname": "J Kumar",
+  "lastname": "Gubbala",
+  "username": "jayakumar",
+  "password": "12345678",
+  "services": ["Electrician"]
 }

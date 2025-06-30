@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const SERVICE_OPTIONS = ["Plumbing", "Electrician", "Carpentry", "Painting", "Cleaning"];
 
 const SignUp = () => {
+  const navigate = useNavigate();
+
   const [isCustomer, setIsCustomer] = useState(true);
   const [isLogin, setIsLogin] = useState(false);
   const [step, setStep] = useState(1);
@@ -44,11 +47,14 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const url = isLogin
-      ? "http://localhost:5000/api/auth/login"
+      ? isCustomer
+        ? "http://localhost:5000/api/auth/customer/login"
+        : "http://localhost:5000/api/auth/login"
       : isCustomer
         ? "http://localhost:5000/api/auth/customer/register"
-        : "http://localhost:5000/api/auth/register";
+        : "http://localhost:5000/api/auth/worker/register";
 
     const payload = isLogin
       ? { email: formData.email, password: formData.password }
@@ -80,6 +86,7 @@ const SignUp = () => {
 
       if (res.ok) {
         alert(`✅ ${isLogin ? "Login" : "Registration"} successful!`);
+
         setFormData({
           email: "",
           firstname: "",
@@ -90,6 +97,14 @@ const SignUp = () => {
           services: []
         });
         setStep(1);
+
+        if (isLogin) {
+          if (isCustomer) {
+            navigate("/customer/dashboard");
+          } else {
+            navigate("/worker/dashboard");
+          }
+        }
       } else {
         alert(`❌ ${data.message || "Something went wrong!"}`);
       }
@@ -108,7 +123,6 @@ const SignUp = () => {
           {isLogin ? "Login to your account" : "Create an account to get started"}
         </p>
 
-        {/* Toggle user type */}
         {!isLogin && (
           <div className="flex justify-between mb-6">
             <button
@@ -193,7 +207,6 @@ const SignUp = () => {
           )}
         </form>
 
-        {/* Toggle Login/Register */}
         <div className="mt-6 text-center text-sm text-gray-600">
           {isLogin ? (
             <>
