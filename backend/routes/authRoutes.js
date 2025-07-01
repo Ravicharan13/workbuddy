@@ -18,11 +18,14 @@ const {
   getCustWorkReq,
   getAllByWork,
   getAll,
-  acceptRequest
+  acceptRequest,
+  getWorkerProfile
 } = require("../controllers/controllers");
 
 // Worker routes
 router.post("/worker/register", register);   
+router.get("/worker/profile", auth, getWorkerProfile);
+
 router.post("/login", login);
 router.put("/profileupdate", auth, updateWorkerProfile);
 router.get("/all", auth, getAllWorkers);

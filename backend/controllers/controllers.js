@@ -264,17 +264,21 @@ exports.verifyResetCode = async (req, res) => {
   }
 };
 
+// Get Worker Profile
+exports.getWorkerProfile = async (req, res) => {
+  try {
+    const workerId = req.user.id;
 
+    const worker = await Worker.findById(workerId).select("-password");
+    if (!worker) {
+      return res.status(404).json({ message: "Worker not found" });
+    }
 
-
-
-
-
-
-
-
-
-
+    res.status(200).json(worker);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 
 // Customer Registration
@@ -446,23 +450,6 @@ exports.getCustomerData = async (req,res) => {
     res.status(500).json({message:err.message})
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // CUSTOMER AND WORKER SERVICE REQUEST APIS
 // CUSTOMER-WORKER REQUEST API
 exports.getCustWorkReq= async (req, res) => {
@@ -533,30 +520,6 @@ exports.getAllByWork=async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 exports.acceptRequest = async (req, res) => {
   try {

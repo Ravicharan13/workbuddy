@@ -6,7 +6,7 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 import PublicRoute from "./Components/PublicRoute";
 import { UserProvider } from "./context/UserContext";
 import WorkerRequests from "./Components/WorkerComponents/WorkerRequests"; // ✅ FIXED PATH
-
+import WorkerProfileUpdate from "./Components/WorkerProfileUpdate"
 function App() {
   return (
     <UserProvider>
@@ -35,6 +35,15 @@ function App() {
               element={
                 <ProtectedRoute>
                   <WorkerRequests />
+                </ProtectedRoute>
+              }
+            />
+
+             <Route
+              path="/worker/update"
+              element={
+                <ProtectedRoute>
+                  <WorkerProfileUpdate />
                 </ProtectedRoute>
               }
             />
