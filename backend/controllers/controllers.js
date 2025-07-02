@@ -107,31 +107,19 @@ exports.getAllWorkers = async (req, res) => {
   }
 };
 
-
-
-exports.customerRegister = async (req, res) => {
-  const { email, firstname, lastname, username, password } = req.body;
-
+// Get Worker Profile
+exports.getWorkerProfile = async (req, res) => {
   try {
-    const userExists = await Customer.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "Customer already exists" });
+    const workerId = req.user.id;
+
+    const worker = await Worker.findById(workerId).select("-password");
+    if (!worker) {
+      return res.status(404).json({ message: "Worker not found" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newCustomer = await Customer.create({
-      email,
-      firstname,
-      lastname,
-      username,
-      password: hashedPassword
-    });
-
-    res.status(201).json({ message: "Customer registered successfully" });
-
-  } catch (e) {
-    res.status(500).json({ message: e.message });
+    res.status(200).json(worker);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -166,50 +154,18 @@ exports.updateWorkerProfile = async (req, res) => {
   }
 };
 
-exports.customerLogin = async (req, res) => {
-  const { email, password } = req.body;
 
-  try {
-    const customer = await Customer.findOne({ email });
-    if (!customer) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-
-    const isMatch = await bcrypt.compare(password, customer.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Password incorrect" });
-    }
-
-    // Generate token
-    const token = jwt.sign(
-      { id: customer._id, email: customer.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
-    );
-
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        id: customer._id,
-        email: customer.email,
-        firstname: customer.firstname,
-        lastname: customer.lastname,
-        username: customer.username
-      }
-    });
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  }
-};
 
 
 // Send Reset Code (Worker)
-exports.sendResetCode = async (req, res) => {
+exports.sendResetCodeWorker = async (req, res) => {
   const { email } = req.body;
   try {
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
     const user = await Worker.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found!" });
+    if (!user) return res.status(404).json({ message: "User with this email does not exist!" });
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = new Date(Date.now() + 15 * 60 * 1000);
@@ -227,9 +183,9 @@ exports.sendResetCode = async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: `"WorkBuddy" <${process.env.EMAIL_USER}>`,
       to: user.email,
-      subject: "Your Password Reset Code",
+      subject: 'WorkBuddy: Password Reset Code',
       html: `<p>Your reset code is: <b>${code}</b></p><p>This code will expire in 15 minutes.</p>`,
     });
 
@@ -239,46 +195,84 @@ exports.sendResetCode = async (req, res) => {
   }
 };
 
-// Verify Reset Code (Worker)
-exports.verifyResetCode = async (req, res) => {
-  const { email, code, newPassword } = req.body;
-
+// worker resetcode verify
+exports.verifyResetCodeWorker = async (req, res) => {
   try {
-    const user = await Worker.findOne({ email });
-    if (!user || user.resetCode !== code)
-      return res.status(400).json({ message: "Invalid reset code" });
+    const { email, code } = req.body;
 
-    if (user.resetCodeExpires < new Date())
-      return res.status(400).json({ message: "Reset code has expired" });
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-    user.resetCode = undefined;
-    user.resetCodeExpires = undefined;
-
-    await user.save();
-
-    res.json({ message: "Password reset successful" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// Get Worker Profile
-exports.getWorkerProfile = async (req, res) => {
-  try {
-    const workerId = req.user.id;
-
-    const worker = await Worker.findById(workerId).select("-password");
-    if (!worker) {
-      return res.status(404).json({ message: "Worker not found" });
+    
+    if (!email || !code) {
+      return res.status(400).json({ message: 'Email and code are required' });
     }
 
-    res.status(200).json(worker);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const user = await Worker.findOne({ email });
+    if (!user || !user.resetCode) {
+      return res.status(404).json({ message: 'No reset code found. Please request a new one.' });
+    }
+
+    if (user.resetCode !== code) {
+      return res.status(400).json({ message: 'Invalid reset code' });
+    }
+
+    if (Date.now() > user.resetCodeExpires) {
+      return res.status(400).json({ message: 'Reset code has expired' });
+    }
+
+  
+    user.resetCodeVerified = true;
+    await user.save();
+
+    return res.status(200).json({ message: 'Code verified successfully' });
+  } catch (error) {
+    console.error('Verify Code Error:', error.message);
+    return res.status(500).json({ message: 'Something went wrong. Try again.' });
   }
 };
+
+
+// worker reset password
+exports.resetPasswordWorker = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    // Input validation
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: 'Email and new password are required' });
+    }
+
+    // Find user
+    const user = await Worker.findOne({ email });
+    if (!user || !user.resetCodeVerified) {
+      return res.status(400).json({ message: 'Unauthorized or invalid reset attempt' });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password and clear reset flags
+    user.password = hashedPassword;
+    user.resetCode = null;
+    user.resetCodeExpires = null;
+    user.resetCodeVerified = false;
+    await user.save();
+
+    return res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error('Reset password error:', error.message);
+    return res.status(500).json({ message: 'Server error, please try again later' });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Customer Registration
@@ -331,13 +325,7 @@ exports.customerLogin = async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       accessToken,refreshToken,
-      user: {
-        id: customer._id,
-        email: customer.email,
-        firstname: customer.firstname,
-        lastname: customer.lastname,
-        username: customer.username
-      }
+      username:customer.username
     });
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -376,68 +364,108 @@ exports.updateCustomerProfile = async (req, res) => {
   }
 };
 
-// Customer Send Reset Code for forgot password
-exports.sendResetCodeCust = async (req, res)=>{
-    const {email} = req.body;
-    try{
-        const user = await Customer.findOne({email});
-        if(!user) return res.status(404).json({message:"User not found!"})
-
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
-        const expires = new Date(Date.now() + 15 * 60 * 1000)
-
-        user.resetCode = code;
-        user.resetCodeExpires = expires;
-        await user.save();
-
-        const transporter = nodemailer.createTransport({
-            service:"Gmail",
-            auth:{
-                user:process.env.EMAIL_USER,
-                pass:process.env.EMAIL_PASS
-            }
-        })
-
-        await transporter.sendMail({
-            from:process.env.EMAIL_USER,
-            to: user.email,
-            subject: "Your Password Reset Code",
-            html: `<p>Your reset code is: <b>${code}</b></p><p>This code will expire in 15 minutes.<.p>`,
-
-        })
-        res.json({message:"Reset code send to your email."})
-    }catch(err){
-        res.status(500).json({message:err.message})
-    }
-}
-
-
-// Customer Verify Reset Code for forgot password
-exports.verifyResetCodeCust = async (req, res) => {
-  const { email, code, newPassword } = req.body;
-
+exports.sendResetCodeCustomer = async (req, res) => {
+  const { email } = req.body;
   try {
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
     const user = await Customer.findOne({ email });
-    console.log(user)
-    if (!user || user.resetCode !== code)
-      return res.status(400).json({ message: "Invalid reset code" });
+    if (!user) return res.status(404).json({ message: "User with this email does not exist!" });
 
-    if (user.resetCodeExpires < new Date())
-      return res.status(400).json({ message: "Reset code has expired" });
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 15 * 60 * 1000);
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-    user.resetCode = undefined;
-    user.resetCodeExpires = undefined;
-
+    user.resetCode = code;
+    user.resetCodeExpires = expires;
     await user.save();
 
-    res.json({ message: "Password reset successful" });
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"WorkBuddy" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: 'WorkBuddy: Password Reset Code',
+      html: `<p>Your reset code is: <b>${code}</b></p><p>This code will expire in 15 minutes.</p>`,
+    });
+
+    res.json({ message: "Reset code sent to your email." });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
+exports.verifyResetCodeCustomer = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    
+    if (!email || !code) {
+      return res.status(400).json({ message: 'Email and code are required' });
+    }
+
+    const user = await Customer.findOne({ email });
+    if (!user || !user.resetCode) {
+      return res.status(404).json({ message: 'No reset code found. Please request a new one.' });
+    }
+
+    if (user.resetCode !== code) {
+      return res.status(400).json({ message: 'Invalid reset code' });
+    }
+
+    if (Date.now() > user.resetCodeExpires) {
+      return res.status(400).json({ message: 'Reset code has expired' });
+    }
+
+  
+    user.resetCodeVerified = true;
+    await user.save();
+
+    return res.status(200).json({ message: 'Code verified successfully' });
+  } catch (error) {
+    console.error('Verify Code Error:', error.message);
+    return res.status(500).json({ message: 'Something went wrong. Try again.' });
+  }
+};
+
+
+exports.resetPasswordCustomer = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    // Input validation
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: 'Email and new password are required' });
+    }
+
+    // Find user
+    const user = await Customer.findOne({ email });
+    if (!user || !user.resetCodeVerified) {
+      return res.status(400).json({ message: 'Unauthorized or invalid reset attempt' });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password and clear reset flags
+    user.password = hashedPassword;
+    user.resetCode = null;
+    user.resetCodeExpires = null;
+    user.resetCodeVerified = false;
+    await user.save();
+
+    return res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error('Reset password error:', error.message);
+    return res.status(500).json({ message: 'Server error, please try again later' });
+  }
+};
 
 // Get Customer Data
 exports.getCustomerData = async (req,res) => {
@@ -450,6 +478,23 @@ exports.getCustomerData = async (req,res) => {
     res.status(500).json({message:err.message})
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // CUSTOMER AND WORKER SERVICE REQUEST APIS
 // CUSTOMER-WORKER REQUEST API
 exports.getCustWorkReq= async (req, res) => {
@@ -465,7 +510,7 @@ exports.getCustWorkReq= async (req, res) => {
       workerFirstName,
       workerLastName
     } = req.body;
-
+    console.log(req.body)
     // Basic validation
     if (!customerEmail || !customerFirstName || !customerLastName || !phoneNumber || !location || !serviceWanted || !workerEmail || !workerFirstName || !workerLastName) {
       return res.status(400).json({ message: "All required fields must be filled." });
@@ -520,6 +565,30 @@ exports.getAllByWork=async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 exports.acceptRequest = async (req, res) => {
   try {

@@ -7,13 +7,15 @@ const {
   login,
   getAllWorkers,
   updateWorkerProfile,
-  sendResetCode,
-  verifyResetCode,
+  sendResetCodeWorker,
+  verifyResetCodeWorker,
+  resetPasswordWorker,
   customerRegister,
-   customerLogin,
-   updateCustomerProfile,
-   sendResetCodeCust,
-   verifyResetCodeCust,
+  customerLogin,
+  updateCustomerProfile,
+  sendResetCodeCustomer,
+  verifyResetCodeCustomer,
+  resetPasswordCustomer,
   getCustomerData,
   getCustWorkReq,
   getAllByWork,
@@ -25,21 +27,22 @@ const {
 // Worker routes
 router.post("/worker/register", register);   
 router.get("/worker/profile", auth, getWorkerProfile);
-
 router.post("/login", login);
 router.put("/profileupdate", auth, updateWorkerProfile);
 router.get("/all", auth, getAllWorkers);
 
 // Password reset (Worker)
-router.post("/sendresetcode", sendResetCode);
-router.post("/verifyresetcode", auth, verifyResetCode);
+router.post("/worker/send-resetcode", sendResetCodeWorker);
+router.post("/worker/verify-resetcode", verifyResetCodeWorker);
+router.post("/worker/reset-password", resetPasswordWorker);
 
 // Customer routes
 router.post("/customer/register", customerRegister);
 router.post("/customer/login", customerLogin);
 router.put("/customer/profile", auth, updateCustomerProfile);
-router.post("/customer/sendresetcode", sendResetCodeCust);
-router.post("/customer/verifyresetcode",auth, verifyResetCodeCust);
+router.post("/customer/send-resetcode", sendResetCodeCustomer);
+router.post("/customer/verify-resetcode", verifyResetCodeCustomer);
+router.post("/customer/reset-password", resetPasswordCustomer);
 router.post("/customer/getcustomer",auth, getCustomerData);
 
 

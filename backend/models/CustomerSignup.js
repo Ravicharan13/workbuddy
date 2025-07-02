@@ -4,10 +4,11 @@ const customerSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   firstname: { type: String, required: true },
   lastname: { type: String, required: true },
-  username: { type: String, required: true },
+  username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   resetCode: { type: String },
   resetCodeExpires: { type: Date },
+   resetCodeVerified : {type: Boolean},
   phone: { type: String },            // Optional
   location: { type: String }          // Optional
 }, {

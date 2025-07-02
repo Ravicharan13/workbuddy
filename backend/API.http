@@ -154,17 +154,16 @@ Content-Type: application/json
 // WORKER-CUSTOMER REQUEST APIS
 ###
 POST http://localhost:5000/api/auth/workreq
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxMzA3NjIyLCJleHAiOjE3NTEzMDk0MjJ9.Lyx6iB6IQAsgy2fMiMZiQJpWWD0FG43P4XQtvgpZ_7g
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxNDM1NTQzLCJleHAiOjE3NTE0MzczNDN9.YjlIPYEaENn0eAap8lipwzaCkIXqe1PNcei9Utn-JN0
 Content-Type: application/json
 
 {
-  
-  "customerEmail": "jayakumar.gubbala@gmail.com",
-  "customerFirstName": "Jaya",
-  "customerLastName": "Kumar",
-  "phoneNumber": "8919753805",
-  "location": "Rjy",
-  "serviceWanted": "Car Mech",
+  "customerEmail":"jayakumar.gubbala@gmail.com",
+  "customerFirstName":"G Jaya",
+  "customerLastName":"Kumar",
+  "phoneNumber":"8919753805",
+  "location":"Rjyk",
+  "serviceWanted":"Car Mech",
   "workerEmail":"mrkumar1148@gmail.com",
   "workerFirstName":"Jaya Kumar",
   "workerLastName":"Gubbala"
