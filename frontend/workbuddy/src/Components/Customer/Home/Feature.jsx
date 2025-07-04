@@ -1,29 +1,29 @@
 import React from 'react';
-import { User, FileText, TrendingUp } from 'lucide-react';
+import { Search, MessageSquare, CheckCircle } from 'lucide-react';
 
 function Feature() {
   const features = [
     {
-      icon: <User className="w-8 h-8 text-gray-700 dark:text-gray-50" />,
-      title: "Build a Profile",
-      description: "Highlight your skill and experience for customers",
+      icon: <Search className="w-8 h-8 text-gray-700 dark:text-gray-50" />,
+      title: "Browse Services",
+      description: "Easily discover skilled professionals for your needs.",
     },
     {
-      icon: <FileText className="w-8 h-8 text-gray-700 dark:text-gray-50" />,
-      title: "Manage Requests",
-      description: "View, accept, or decline job requests in one place",
+      icon: <MessageSquare className="w-8 h-8 text-gray-700 dark:text-gray-50" />,
+      title: "Chat Instantly",
+      description: "Connect and communicate with workers in real-time.",
     },
     {
-      icon: <TrendingUp className="w-8 h-8 text-gray-700 dark:text-gray-50" />,
-      title: "Track Earnings",
-      description: "See job progression and manage your payments",
+      icon: <CheckCircle className="w-8 h-8 text-gray-700 dark:text-gray-50" />,
+      title: "Track Progress",
+      description: "Monitor service status and completion updates.",
     },
   ];
 
   return (
     <section className="bg-gray-50 dark:bg-gray-800 py-16 px-6 md:px-32">
       <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-800 dark:text-white mb-12">
-        Key Features
+        What You Can Do
       </h2>
 
       <div className="flex flex-col md:flex-row justify-between items-center gap-12 max-w-6xl mx-auto">
@@ -45,4 +45,4 @@ function Feature() {
   );
 }
 
-export default Feature;
+export default Feature ;

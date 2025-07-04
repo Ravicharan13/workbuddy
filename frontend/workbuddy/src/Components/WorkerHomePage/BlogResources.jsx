@@ -37,7 +37,7 @@ function BlogResources() {
 
         <div className="grid gap-8 md:grid-cols-2">
           {posts.map((post, index) => (
-            <div key={index} className="bg-white dark:bg-gray-900 rounded-lg p-6 shadow hover:shadow-md transition">
+            <div key={index} className="bg-white dark:bg-gray-900 rounded-md p-6 shadow hover:shadow-md transition">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">{post.title}</h3>
               <p className="text-gray-600 dark:text-gray-300 mb-4">{post.excerpt}</p>
               <div className="text-sm text-gray-500 dark:text-gray-400">
