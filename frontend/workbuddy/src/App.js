@@ -14,7 +14,7 @@ import { ToastContainer } from 'react-toastify';
 import ForgotPasswordPage from "./Components/SignUp/WorkerForgotPasswordPage";
 import ForgotPasswordPageCust from "./Components/SignUp/CustomerForgotPasswordPage";
 import WorkerProfileUpdate from "./Components/WorkerProfileUpdate"
-
+import ChatPage from "./Components/ChatPage";
 
 
 function App() {
@@ -88,6 +88,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/messages" element={<ChatPage />} />
             
           </Routes>
         </div>

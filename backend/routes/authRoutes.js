@@ -21,7 +21,8 @@ const {
   getAllByWork,
   getAll,
   acceptRequest,
-  getWorkerProfile
+  getWorkerProfile,
+  getChatRoomId
 } = require("../controllers/controllers");
 
 // Worker routes
@@ -53,3 +54,6 @@ router.get("/getall",getAll)
 router.put("/accept",auth, acceptRequest)
 
 module.exports = router;
+
+//chatbox and we need pass the customerId and workerId
+router.get("/messages/chat-status/:customerId/:workerId", getChatRoomId);

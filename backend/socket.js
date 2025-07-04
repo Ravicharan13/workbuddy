@@ -1,21 +1,26 @@
-const Message = require('./models/Message');
+const Message = require("./models/Message");
 
 module.exports = (io) => {
-  io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
+  io.on("connection", (socket) => {
+    console.log("🟢 New client connected");
 
-    socket.on('join_room', ({ userId, role }) => {
-      socket.join(`${role}_${userId}`);
+    socket.on("joinRoom", ({ roomId }) => {
+      socket.join(roomId);
+      console.log("Joined room:", roomId);
     });
 
-    socket.on('send_message', async ({ senderId, senderRole, receiverId, receiverRole, content }) => {
-      const newMessage = await Message.create({ senderId, senderRole, receiverId, receiverRole, content });
-      io.to(`${receiverRole}_${receiverId}`).emit('receive_message', newMessage);
-      io.to(`${senderRole}_${senderId}`).emit('receive_message', newMessage);
+    socket.on("sendMessage", async (msg) => {
+      try {
+        const newMsg = new Message(msg);
+        await newMsg.save();
+        io.to(msg.roomId).emit("receiveMessage", msg);
+      } catch (err) {
+        console.error("Message error:", err.message);
+      }
     });
 
-    socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.id);
+    socket.on("disconnect", () => {
+      console.log("🔴 Client disconnected");
     });
   });
 };

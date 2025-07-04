@@ -79,7 +79,7 @@ Content-Type: application/json
 
 {
   "email": "jayakumar.gubbala@gmail.com",
-  "password": "NewStrongPassword123"
+  "password": "Jayak@234"
 }
 
 
@@ -154,7 +154,7 @@ Content-Type: application/json
 // WORKER-CUSTOMER REQUEST APIS
 ###
 POST http://localhost:5000/api/auth/workreq
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxNDM1NTQzLCJleHAiOjE3NTE0MzczNDN9.YjlIPYEaENn0eAap8lipwzaCkIXqe1PNcei9Utn-JN0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxNjAyMTY5LCJleHAiOjE3NTE2MDM5Njl9.qBII1gNqZpAFMULHB5XAW5j44EfGIltmPa9rgRDUsog
 Content-Type: application/json
 
 {
