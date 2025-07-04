@@ -50,13 +50,13 @@ function FaqSection() {
         {faqs.map((faq, index) => (
           <div
             key={index}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-900 shadow-sm"
+            className="border border-gray-200 dark:border-gray-700 rounded-md p-4 bg-white dark:bg-gray-900 shadow-sm"
           >
             <button
               onClick={() => toggleFAQ(index)}
               className="flex justify-between items-center w-full text-left"
             >
-              <span className="text-lg font-semibold text-gray-900 dark:text-white">
+              <span className="text-base font-semibold text-gray-900 dark:text-white">
                 {faq.question}
               </span>
               {openIndex === index ? (

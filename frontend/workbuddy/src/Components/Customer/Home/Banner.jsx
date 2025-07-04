@@ -1,6 +1,7 @@
 import React from 'react';
-import banner from '../../Assests/banner.png';
-import banner2 from "../../Assests/colorban.jpg"
+
+import bannerlight from "../../../Assests/bannerlight.jpg"
+import bannerdark from "../../../Assests/bannerdark.jpg"
 
 function Banner() {
   return (
@@ -8,25 +9,25 @@ function Banner() {
       {/* Left Content */}
       <div className="w-full md:w-1/2 space-y-6 text-center md:text-left">
         <h1 className="text-4xl md:text-5xl lg::text-6xl font-bold leading-tight dark:text-white">
-          Unlock Opportunities <br /> & Manage Requests
+           Find Trusted Services <br /> At Your Fingertips
         </h1>
         <p className="text-gray-600 dark:text-gray-300 text-xl md:text-3xl">
-          A single platform to showcase your skills, earn gigs, and track job progress.
+         Connect with skilled professionals, track service progress, and get tasks done easily.
         </p>
         <button className="bg-gray-800 hover:bg-gray-700 duration-300 dark:bg-gray-700 dark:hover:bg-gray-500 text-white px-6 py-3 rounded-sm">
-          Get Started
+          Explore Services
         </button>
       </div>
 
       {/* Right Image */}
       <div className="w-full md:w-1/2 flex justify-center">
         <img
-          src={banner}
+          src={bannerlight}
           alt="Worker illustration"
           className="w-full max-w-sm md:max-w-md dark:hidden"
         />
         <img
-          src={banner2}
+          src={bannerdark}
           alt="Worker illustration dark"
           className="w-full max-w-sm md:max-w-md hidden dark:block"
         />

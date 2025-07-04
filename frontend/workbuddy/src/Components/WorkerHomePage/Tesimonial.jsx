@@ -36,8 +36,6 @@ const testimonials = [
 function TestimonialSlider() {
   const [index, setIndex] = useState(0);
 
-  const next = () => setIndex((prev) => (prev + 1) % testimonials.length);
-  const prev = () => setIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
 
   // Auto-slide effect
   useEffect(() => {
@@ -55,13 +53,9 @@ function TestimonialSlider() {
       </h2>
 
       <div className="flex justify-center items-center space-x-6 max-w-4xl mx-auto">
-        {/* Prev Button */}
-        <button onClick={prev} className="p-2 bg-gray-100 dark:bg-gray-700 rounded-full shadow">
-          ←
-        </button>
 
         {/* Testimonial Card */}
-        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 w-full h-[250px] md:h-[200px] md:w-[500px] text-center shadow transition duration-500 ease-in-out">
+        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-6 w-full h-[250px] md:h-[200px] md:w-[500px] text-center shadow transition duration-500 ease-in-out">
           <img
             src={testimonials[index].avatar}
             alt={testimonials[index].name}
@@ -73,10 +67,7 @@ function TestimonialSlider() {
           <span className="text-sm text-gray-500 dark:text-gray-400">{testimonials[index].name}</span>
         </div>
 
-        {/* Next Button */}
-        <button onClick={next} className="p-2 bg-gray-100 dark:bg-gray-700 rounded-full shadow">
-          →
-        </button>
+        
       </div>
 
       {/* Dots */}

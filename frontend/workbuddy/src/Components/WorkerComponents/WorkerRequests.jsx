@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
 import dayjs from 'dayjs';
 import Footer from '../WorkerHomePage/Footer';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 export default function WorkerRequests() {
   const [requests, setRequests] = useState([]);
@@ -37,7 +40,16 @@ export default function WorkerRequests() {
 
       setRequests(formatted);
     } catch (error) {
-      console.error('Fetch error:', error);
+      toast.error('Failed to fetch', {
+        toastId: 'fetch-error',
+        position: 'top-right',
+        className: 'bg-gray-800 text-white uppercase font-semibold',
+        bodyClassName: 'text-sm',
+        progressClassName: 'bg-gray-800',
+      });
+
+
+
     }
   };
   fetchRequests();
@@ -65,10 +77,12 @@ export default function WorkerRequests() {
         prev.map(r => r.id === id ? { ...r, status: 'accepted', reason: '' } : r)
       );
     } else {
-      console.error('Accept failed:', result);
+      toast.error(result.message || 'Failed to accept request.');
+
     }
   } catch (error) {
-    console.error('Accept error:', error);
+    toast.error('Error while accepting request.');
+
   }
 };
 
@@ -100,10 +114,12 @@ export default function WorkerRequests() {
       setRejectingId(null);
       setReasonInput('');
     } else {
-      console.error('Reject failed:', result);
+      toast.error(result.message || 'Failed to reject request.');
+
     }
   } catch (error) {
-    console.error('Reject error:', error);
+    toast.error('Error while rejecting request.');
+
   }
 };
   const filtered = requests.filter(r =>

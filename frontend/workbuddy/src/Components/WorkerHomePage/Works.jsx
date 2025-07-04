@@ -4,17 +4,17 @@ import { User, CheckSquare, DollarSign } from 'lucide-react';
 function HowItWorks() {
   const steps = [
     {
-      icon: <User className="w-10 h-10 text-primary dark:text-gray-50" />,
+      icon: <User className="w-10 h-10 text-gray-700 dark:text-gray-50" />,
       title: "Create Your Profile",
       description: "Highlight your skills and experience for customers"
     },
     {
-      icon: <CheckSquare className="w-10 h-10 text-primary dark:text-gray-50" />,
+      icon: <CheckSquare className="w-10 h-10 text-gray-700 dark:text-gray-50" />,
       title: "Accept Job Requests",
       description: "View, accept, or decline job requests in one place"
     },
     {
-      icon: <DollarSign className="w-10 h-10 text-primary dark:text-gray-50" />,
+      icon: <DollarSign className="w-10 h-10 text-gray-700 dark:text-gray-50" />,
       title: "Track and Get Paid",
       description: "See job progression and manage your payments"
     }
@@ -28,7 +28,7 @@ function HowItWorks() {
       <div className="flex flex-col md:flex-row justify-between items-center gap-12">
         {steps.map((step, idx) => (
           <div key={idx} className="flex flex-col items-center text-center space-y-4">
-            <div className="bg-blue-100 dark:bg-gray-700 dark:text-white rounded-full p-4">
+            <div className="bg-gray-200 dark:bg-gray-700 dark:text-white rounded-full p-4">
               {step.icon}
             </div>
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white">

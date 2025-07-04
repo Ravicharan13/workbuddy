@@ -43,7 +43,7 @@ function TopRatedWorkers() {
         {workers.map((worker, index) => (
           <div
             key={index}
-            className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow hover:shadow-md transition"
+            className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-6 shadow hover:shadow-md transition"
           >
             <img
               src={worker.avatar}
@@ -71,7 +71,7 @@ function TopRatedWorkers() {
               {worker.skills.map((skill, i) => (
                 <span
                   key={i}
-                  className="text-xs bg-blue-100 dark:bg-gray-700 text-primary dark:text-gray-50 px-3 py-1 rounded-full"
+                  className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-50 px-3 py-1 rounded-sm"
                 >
                   {skill}
                 </span>
