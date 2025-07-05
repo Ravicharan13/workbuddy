@@ -21,7 +21,13 @@ const {
   getAllByWork,
   getAll,
   acceptRequest,
-  getWorkerProfile
+  getWorkerProfile,
+  updateAvatar,
+  updateInfo,
+  addService,
+  deleteService,
+  deleteAllServices,
+  changePassword
 } = require("../controllers/controllers");
 
 // Worker routes
@@ -35,6 +41,14 @@ router.get("/all", auth, getAllWorkers);
 router.post("/worker/send-resetcode", sendResetCodeWorker);
 router.post("/worker/verify-resetcode", verifyResetCodeWorker);
 router.post("/worker/reset-password", resetPasswordWorker);
+//Worker profile api's
+router.get("/worker/profile",auth,getWorkerProfile)
+router.patch("/worker/update-avatar",auth,updateAvatar)
+router.patch("/worker/update-info",auth,updateInfo)
+router.post('/worker/services', auth, addService);
+router.delete('/worker/services/:serviceId', auth, deleteService);
+router.delete('/worker/services', auth, deleteAllServices);
+router.patch("/worker/change-password",auth,changePassword)
 
 // Customer routes
 router.post("/customer/register", customerRegister);

@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const Request = require("../models/WorkerCustomerRequest")
 const { v4: uuidv4 } = require("uuid");
+const mongoose = require('mongoose');
 
 // Generate Access Token
 const generateAccessToken = (user) => {
@@ -153,6 +154,159 @@ exports.updateWorkerProfile = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+// Worker Profile Page API's
+// Get All Data Worker
+// GET /api/worker/profile
+exports.getWorkerProfile = async (req, res) => {
+  try {
+    const user = await Worker.findById(req.user.id).select('-__v');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// PATCH /api/worker/update-avatar
+exports.updateAvatar = async (req, res) => {
+  try {
+    const { avatar } = req.body;
+    const updated = await Worker.findByIdAndUpdate(req.user.id, { avatar }, { new: true });
+    res.json({message:"Avatar updated successfully"});
+  } catch (err) {
+    res.status(500).json({ message: 'Avatar update failed' });
+  }
+};
+
+// // In routes/worker.js
+exports.updateInfo = async (req, res) => {
+  try {
+    const updated = await Worker.findByIdAndUpdate(
+      req.user.id,
+      {
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        dob: req.body.dob,
+        phone: req.body.phone,
+        location: req.body.location,
+        description: req.body.description,
+      },
+      { new: true }
+    );
+    res.json({message:"Updated Successfully!"});
+  } catch (err) {
+    return res.status(500).json({ message: 'Failed to update info' });
+  }
+};
+
+
+// PATCH /api/worker/add-service
+exports.addService = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const workerId = req.user.id; // from JWT middleware
+
+    if (!name) {
+      return res.status(400).json({ message: "Service name is required" });
+    }
+
+    const worker = await Worker.findById(workerId);
+    if (!worker) return res.status(404).json({ message: "Worker not found" });
+
+    // Add new service
+    worker.services.push({ name }); // Mongoose will auto-create _id
+
+    await worker.save();
+
+    const newService = worker.services[worker.services.length - 1];
+    res.status(201).json(newService); // Send only the new service added
+  } catch (error) {
+    console.error("Add service error:", error);
+    res.status(500).json({ message: "Server error while adding service" });
+  }
+};
+
+exports.deleteService = async (req, res) => {
+  try {
+    const workerId = req.user.id;
+    const { serviceId } = req.params;
+
+    const worker = await Worker.findById(workerId);
+    if (!worker) return res.status(404).json({ message: "Worker not found" });
+
+    // Filter out the service by _id
+    worker.services = worker.services.filter(
+      (s) => s._id.toString() !== serviceId
+    );
+
+    await worker.save();
+
+    res.status(200).json({ message: "Service deleted successfully" });
+  } catch (error) {
+    console.error("Delete service error:", error);
+    res.status(500).json({ message: "Server error while deleting service" });
+  }
+};
+
+
+// DELETE all services for the authenticated worker
+exports.deleteAllServices = async (req, res) => {
+  try {
+    const workerId = req.user.id; // Assuming worker is authenticated and ID is attached via middleware
+
+    const updatedWorker = await Worker.findByIdAndUpdate(
+      workerId,
+      { services: [] },
+      { new: true }
+    );
+
+    if (!updatedWorker) {
+      return res.status(404).json({ message: "Worker not found" });
+    }
+
+    res.status(200).json({ message: "All services deleted", services: updatedWorker.services });
+  } catch (error) {
+    console.error("Delete all services error:", error);
+    res.status(500).json({ message: "Server error while deleting all services" });
+  }
+};
+
+
+exports.changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const workerId = req.user.id;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  try {
+    const worker = await Worker.findById(workerId);
+    if (!worker) return res.status(404).json({ message: 'Worker not found' });
+
+    const isMatch = await bcrypt.compare(currentPassword, worker.password);
+    if (!isMatch) return res.status(401).json({ message: 'Incorrect current password' });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+    worker.password = hashedNewPassword;
+    await worker.save();
+
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error while changing password' });
+  }
+};
+
+
+
+
+
 
 
 
