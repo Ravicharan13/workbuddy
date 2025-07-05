@@ -96,7 +96,17 @@ exports.login = async (req, res) => {
   }
 };
 
-
+exports.workers=async (req,res)=>
+{
+  try
+  {
+      const workers= await Worker.find();
+      res.send(workers);
+  }catch(e)
+  {
+    res.send(e.message).status(500);
+  }
+}
 
 // GETTING ALL WORKERS DETAILS
 exports.getAllWorkers = async (req, res) => {
@@ -806,3 +816,40 @@ exports.acceptRequest = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+
+// Check chat availability and return chatRoomId if accepted
+exports.getChatRoomId = async (req, res) => {
+  const { customerId, workerId } = req.params;
+
+  try {
+    const request = await Request.findOne({
+      customerId,
+      workerId,
+      workerStatus: "accepted",
+    });
+
+    if (!request || !request.chatRoomId) {
+      return res.status(403).json({ canChat: false });
+    }
+
+    res.status(200).json({
+      canChat: true,
+      chatRoomId: request.chatRoomId,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+exports.service=async (req,res)=>
+{
+  try{
+    
+
+  }catch(e)
+  {
+    res.send(e.message).status(400);
+  }
+}

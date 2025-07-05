@@ -1,11 +1,28 @@
 const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema({
-  senderId: mongoose.Schema.Types.ObjectId,
-  senderRole: { type: String, enum: ['customer', 'worker'] },
-  receiverId: mongoose.Schema.Types.ObjectId,
-  receiverRole: { type: String, enum: ['customer', 'worker'] },
-  content: String,
-  timestamp: { type: Date, default: Date.now }
+  roomId: {
+    type: String,
+    required: true,
+  },
+  senderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    refPath: "senderRole", // Can be 'Worker' or 'Customer'
+  },
+  senderRole: {
+    type: String,
+    enum: ["Worker", "Customer"],
+    required: true,
+  },
+  text: {
+    type: String,
+    required: true,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
 });
-module.exports = mongoose.model('Message', messageSchema);
+
+module.exports = mongoose.model("Message", messageSchema);

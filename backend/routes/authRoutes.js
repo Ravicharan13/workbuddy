@@ -28,6 +28,8 @@ const {
   deleteService,
   deleteAllServices,
   changePassword
+  getChatRoomId,
+  workers
 } = require("../controllers/controllers");
 
 // Worker routes
@@ -36,6 +38,7 @@ router.get("/worker/profile", auth, getWorkerProfile);
 router.post("/login", login);
 router.put("/profileupdate", auth, updateWorkerProfile);
 router.get("/all", auth, getAllWorkers);
+router.get("/workers",auth,workers)
 
 // Password reset (Worker)
 router.post("/worker/send-resetcode", sendResetCodeWorker);
@@ -67,3 +70,6 @@ router.get("/getall",getAll)
 router.put("/accept",auth, acceptRequest)
 
 module.exports = router;
+
+//chatbox and we need pass the customerId and workerId
+router.get("/messages/chat-status/:customerId/:workerId", getChatRoomId);
