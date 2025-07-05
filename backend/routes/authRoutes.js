@@ -22,7 +22,8 @@ const {
   getAll,
   acceptRequest,
   getWorkerProfile,
-  getChatRoomId
+  getChatRoomId,
+  workers
 } = require("../controllers/controllers");
 
 // Worker routes
@@ -31,6 +32,7 @@ router.get("/worker/profile", auth, getWorkerProfile);
 router.post("/login", login);
 router.put("/profileupdate", auth, updateWorkerProfile);
 router.get("/all", auth, getAllWorkers);
+router.get("/workers",auth,workers)
 
 // Password reset (Worker)
 router.post("/worker/send-resetcode", sendResetCodeWorker);

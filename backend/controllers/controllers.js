@@ -95,7 +95,17 @@ exports.login = async (req, res) => {
   }
 };
 
-
+exports.workers=async (req,res)=>
+{
+  try
+  {
+      const workers= await Worker.find();
+      res.send(workers);
+  }catch(e)
+  {
+    res.send(e.message).status(500);
+  }
+}
 
 // GETTING ALL WORKERS DETAILS
 exports.getAllWorkers = async (req, res) => {
@@ -677,3 +687,15 @@ exports.getChatRoomId = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+exports.service=async (req,res)=>
+{
+  try{
+    
+
+  }catch(e)
+  {
+    res.send(e.message).status(400);
+  }
+}

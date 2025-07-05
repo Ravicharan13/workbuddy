@@ -14,7 +14,9 @@ import { ToastContainer } from 'react-toastify';
 import ForgotPasswordPage from "./Components/SignUp/WorkerForgotPasswordPage";
 import ForgotPasswordPageCust from "./Components/SignUp/CustomerForgotPasswordPage";
 import WorkerProfileUpdate from "./Components/WorkerProfileUpdate"
-
+import CustomerHome from "./Components/Customer/Home/Home"
+import BrowseServicesPage from "./Components/Customer/Services/BrowseServicesPage";
+import TrackRequestPage from "./Components/Customer/Services/TrackRequestPage";
 
 
 function App() {
@@ -88,6 +90,30 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/customer/home"
+              element={
+                <ProtectedRoute>
+                  <CustomerHome />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/customer/services"
+              element={
+                <ProtectedRoute>
+                  <BrowseServicesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/customer/service/track-request"
+              element={
+                <ProtectedRoute>
+                  <TrackRequestPage />
+                </ProtectedRoute>
+              }
+            />
             
           </Routes>
         </div>
@@ -99,4 +125,3 @@ function App() {
 }
 
 export default App;
-
