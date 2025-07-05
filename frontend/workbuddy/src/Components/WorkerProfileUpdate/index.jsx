@@ -114,7 +114,11 @@ const handleInputChange = (e) => {
         const { firstname, lastname, dob, phone, location, description , services} = res.data;
         setInfo({ firstname, lastname, dob, phone, location, description });
         console.log(services)
-        setServices(services);
+        if (Array.isArray(res.data.services)) {
+        setServices(res.data.services);
+      } else {
+        setServices([]);
+      }
         setProfile(res.data);
         console.log(res.data)
       } catch (err) {
@@ -458,23 +462,25 @@ const handleInputChange = (e) => {
             </div>
 
             {/* Services List */}
-            {services.length === 0 ? (
-                <div className="text-gray-300 text-sm mt-2">No services added yet.</div>
-              ) : (
-                <div className="flex flex-wrap gap-3">
-                  {services.map((service) => (
-                    <div
-                      key={service._id}
-                      className="bg-gray-800 text-white dark:bg-gray-900 px-4 py-2 rounded-sm flex items-center gap-2"
-                    >
-                      <span>{service.name}</span>
-                      <button onClick={() => handleDeleteService(service._id)}>
-                        <X size={16} className="hover:text-red-500" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+            {Array.isArray(services) && services.length === 0 ? (
+  <div className="text-gray-300 text-sm mt-2">No services added yet.</div>
+) : (
+  <div className="flex flex-wrap gap-3">
+    {Array.isArray(services) &&
+      services.map((service) => (
+        <div
+          key={service._id}
+          className="bg-gray-800 text-white dark:bg-gray-900 px-4 py-2 rounded-sm flex items-center gap-2"
+        >
+          <span>{service.name}</span>
+          <button onClick={() => handleDeleteService(service._id)}>
+            <X size={16} className="hover:text-red-500" />
+          </button>
+        </div>
+      ))}
+  </div>
+)}
+
 
 
           </section>

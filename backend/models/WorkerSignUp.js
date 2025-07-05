@@ -13,7 +13,7 @@ const workerSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   firstname:    { type: String, required: true },
   lastname: { type: String, required: true },
-  services: { type: [String],default: [] },
+  services: [ serviceSchema] ,
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   resetCode: { type: String },

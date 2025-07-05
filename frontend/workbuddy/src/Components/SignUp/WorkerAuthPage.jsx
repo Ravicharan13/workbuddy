@@ -29,6 +29,7 @@ const WorkerAuthPage = () => {
     confirmPassword: ""
   });
 
+  const username= localStorage.getItem("username")
  
 
 
@@ -50,7 +51,7 @@ const WorkerAuthPage = () => {
     });
 
     toast.dismiss(); // remove loading
-    toast.success("Login successful!");
+    toast.success("Welcome Back!",username);
     
     const data = response.data;
 
