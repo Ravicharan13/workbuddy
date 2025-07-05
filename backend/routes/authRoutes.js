@@ -27,9 +27,9 @@ const {
   addService,
   deleteService,
   deleteAllServices,
-  changePassword
-  getChatRoomId,
-  workers
+  changePassword,
+  workers,
+  getChatRoomId
 } = require("../controllers/controllers");
 
 // Worker routes
