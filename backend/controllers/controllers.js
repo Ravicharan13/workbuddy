@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const Request = require("../models/WorkerCustomerRequest")
 const { v4: uuidv4 } = require("uuid");
+const Message = require("../models/Message")
 const mongoose = require('mongoose');
 
 // Generate Access Token
@@ -871,16 +872,46 @@ exports.getChatRoomId = async (req, res) => {
 };
 
 
-exports.service=async (req,res)=>
-{
-  try{
-    
-
-  }catch(e)
-  {
-    res.send(e.message).status(400);
+exports.getChart = async (req, res) => {
+  try {
+    console.log("getChart",req.params.chatRoomId)
+    const messages = await Message.find({ chatRoomId: req.params.chatRoomId }).sort({ timestamp: 1 });
+    console.log("message:",messages)
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch messages' });
   }
-}
+};
+
+// Example for worker
+exports.getChatMessages = async (req, res) => {
+  try {
+    const email = req.user.email;
+    const role = req.user.role;
+
+    const filter = role === "worker"
+  ? { workerEmail: email, workerStatus: { $in: ["accepted", "completed"] } }
+  : { customerEmail: email, workerStatus: { $in: ["accepted", "completed"] } };
+
+
+    const requests = await Request.find(filter);
+
+    const chats = requests.map((req) => ({
+      chatRoomId: req.chatRoomId,
+      name: role === "worker"
+        ? `${req.customerFirstName} ${req.customerLastName}`
+        : `${req.workerFirstName} ${req.workerLastName}`,
+      location: role === "worker" ? req.customerLocation : "RJY",
+      avatar: "https://i.pravatar.cc/150?u=" + req.chatRoomId,
+    }));
+
+    res.json(chats);
+  } catch (err) {
+    console.error("❌ Chat Fetch Error:", err.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 
 
 
@@ -970,38 +1001,3 @@ exports.acceptRequest = async (req, res) => {
 };
 
 
-// Check chat availability and return chatRoomId if accepted
-exports.getChatRoomId = async (req, res) => {
-  const { customerId, workerId } = req.params;
-
-  try {
-    const request = await Request.findOne({
-      customerId,
-      workerId,
-      workerStatus: "accepted",
-    });
-
-    if (!request || !request.chatRoomId) {
-      return res.status(403).json({ canChat: false });
-    }
-
-    res.status(200).json({
-      canChat: true,
-      chatRoomId: request.chatRoomId,
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-
-exports.service=async (req,res)=>
-{
-  try{
-    
-
-  }catch(e)
-  {
-    res.send(e.message).status(400);
-  }
-}

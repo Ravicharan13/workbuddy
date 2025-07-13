@@ -11,7 +11,7 @@ const CustomerAuthPage = () => {
   const params = new URLSearchParams(location.search);
   const mode = params.get("mode");
 
-  const [isSignup, setIsSignup] = useState(mode !== "login");
+  const [isSignup, setIsSignup] = useState(mode === "login");
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +27,7 @@ const CustomerAuthPage = () => {
   });
 
   useEffect(() => {
-    setIsSignup(mode !== "login");
+    setIsSignup(mode === "login");
     setStep(1);
   }, [mode]);
 

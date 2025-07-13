@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import ChatRoom from '../../ChatBox/ChatRoom';
+import {getUser} from '../../SignUp/auth';
 
 export default function TrackRequestPage() {
   const [requests, setRequests] = useState([]);
   const [cancelId, setCancelId] = useState(null); // stores the request ID to cancel
+  const role = getUser();
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -35,6 +38,7 @@ export default function TrackRequestPage() {
           workerName: `${item.workerFirstName} ${item.workerLastName}`,
           workerEmail: item.workerEmail,
           workerPhone: item.workerPhoneNumber,
+          chatRoomId: item.chatRoomId
         }));
 
         setRequests(formatted);
@@ -141,6 +145,9 @@ export default function TrackRequestPage() {
                     <p><strong>Phone:</strong> {req.workerPhone}</p>
                   </div>
                 )}
+                {req.status === "accepted" && (
+                <ChatRoom chatRoomId={req.chatRoomId} user={role} />
+                 )}
 
                 {/* ✅ Rejection Reason */}
                 {req.status === 'rejected' && req.reason && (

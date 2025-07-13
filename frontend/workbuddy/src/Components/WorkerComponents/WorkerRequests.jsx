@@ -3,6 +3,8 @@ import dayjs from 'dayjs';
 import Footer from '../WorkerHomePage/Footer';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ChatRoom from '../ChatBox/ChatRoom';
+import {getUser} from "../SignUp/auth"
 
 
 export default function WorkerRequests() {
@@ -11,6 +13,7 @@ export default function WorkerRequests() {
   const [sortAsc, setSortAsc] = useState(false);
   const [rejectingId, setRejectingId] = useState(null);
   const [reasonInput, setReasonInput] = useState('');
+  const role = getUser();
 
   useEffect(() => {
   const fetchRequests = async () => {
@@ -37,6 +40,7 @@ export default function WorkerRequests() {
         timeSlot: item.timeSlot,
         status: item.workerStatus,
         reason: item.rejectReason,
+        chatRoomId: item.chatRoomId
       }));
 
       setRequests(formatted);
@@ -199,6 +203,10 @@ export default function WorkerRequests() {
                 <p className="text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-sm bg-gray-100 p-1 text-center">
                   <strong>Time Slot:</strong> <span className="text-gray-700 dark:text-gray-300">{req.timeSlot}</span>
                 </p>
+                {req.status === "accepted" && (
+                  <ChatRoom chatRoomId={req.chatRoomId} user={role} />
+                )}
+
 
                 {req.status==="cancelled" && (
                 <div>

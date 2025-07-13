@@ -19,7 +19,8 @@ import BrowseServicesPage from "./Components/Customer/Services/BrowseServicesPag
 import TrackRequestPage from "./Components/Customer/Services/TrackRequestPage";
 import Unauthorized from "./Components/SignUp/Unauthorized";
 import CustomerProfileUpdate from "./Components/CustomerProfileUpdate/index"
-
+import WorkerChatPage from "./Components/ChatBox/Pages/WorkerChatPage";
+import CustomerChatPage from "./Components/ChatBox/Pages/CustomerChatPage";
 
 function App() {
   return (
@@ -94,6 +95,14 @@ function App() {
               }
             />
             <Route
+              path="/worker/chat-page"
+              element={
+                <ProtectedRoute role="worker">
+                  <WorkerChatPage/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/customer/home"
               element={
                 <ProtectedRoute role="customer">
@@ -122,6 +131,14 @@ function App() {
               element={
                 <ProtectedRoute role="customer">
                   <CustomerProfileUpdate/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/customer/chat-page"
+              element={
+                <ProtectedRoute role="customer">
+                  <CustomerChatPage/>
                 </ProtectedRoute>
               }
             />

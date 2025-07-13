@@ -36,7 +36,9 @@ const {
   custUpdateAvatar,
   custUpdateInfo,
   getAllByCust,
-  customerCancelRequest
+  customerCancelRequest,
+  getChart,
+  getChatMessages
 } = require("../controllers/controllers");
 
 // Worker routes
@@ -81,6 +83,8 @@ router.get("/getallcust",auth,role("customer"),getAllByCust)
 router.put("/customercancelrequest/:id",auth,role("customer"),customerCancelRequest)
 router.get("/getall",getAll)
 router.put("/accept",auth,role("worker"), acceptRequest)
+router.get("/message/:chatRoomId",auth,getChart)
+router.get("/chats",auth,getChatMessages)
 
 module.exports = router;
 

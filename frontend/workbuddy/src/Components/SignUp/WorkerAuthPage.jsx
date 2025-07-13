@@ -14,7 +14,7 @@ const WorkerAuthPage = () => {
   const mode = params.get("mode");
   const { setUser } = useUser();
 
-  const [isSignup, setIsSignup] = useState(mode !== "login");
+  const [isSignup, setIsSignup] = useState(mode === "login");
 
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
@@ -29,7 +29,7 @@ const WorkerAuthPage = () => {
     confirmPassword: ""
   });
 
-  const username= localStorage.getItem("username")
+  // const username= localStorage.getItem("username")
  
 
 
@@ -50,10 +50,12 @@ const WorkerAuthPage = () => {
       },
     });
 
-    toast.dismiss(); // remove loading
-    toast.success("Welcome Back!",username);
+  
     
     const data = response.data;
+
+    toast.dismiss(); // remove loading
+    toast.success("Welcome Back!",data.username);
 
     // Save token in localStorage (optional)
     localStorage.setItem("accessToken", data.accessToken);
@@ -134,7 +136,7 @@ const WorkerAuthPage = () => {
 
 
   useEffect(() => {
-    setIsSignup(mode !== "login");
+    setIsSignup(mode === "login");
   }, [mode]);
   
 
