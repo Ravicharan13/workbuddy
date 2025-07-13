@@ -9,11 +9,12 @@ const { v4: uuidv4 } = require("uuid");
 const mongoose = require('mongoose');
 
 // Generate Access Token
-const generateAccessToken = (user) => {
-  return jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
+const generateAccessToken = (user, role) => {
+  return jwt.sign({ id: user._id, email: user.email, role }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
+
 
 // Generate Refresh Token
 const generateRefreshToken = async (user) => {
@@ -81,14 +82,16 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, worker.password);
     if (!isMatch) return res.status(400).json({ message: "Password Incorrect" });
 
-    const accessToken = generateAccessToken(worker);
+    const accessToken = generateAccessToken(worker,"worker");
     const refreshToken = await generateRefreshToken(worker);
 
     // ✅ Send username in response
     res.json({
       accessToken,
       refreshToken,
-      username: worker.username
+      username: worker.username,
+      email:worker.email,
+      role:worker.role
     });
 
   } catch (err) {
@@ -483,13 +486,15 @@ exports.customerLogin = async (req, res) => {
     }
 
     // Generate token
-     const accessToken = generateAccessToken(customer);
+     const accessToken = generateAccessToken(customer,"customer");
      const refreshToken = await generateRefreshToken(customer)
 
     res.status(200).json({
       message: "Login successful",
       accessToken,refreshToken,
-      username:customer.username
+      username:customer.username,
+      email:customer.email,
+      role:customer.role
     });
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -525,6 +530,77 @@ exports.updateCustomerProfile = async (req, res) => {
     res.json({ message: "Profile updated successfully", customer: updatedCustomer });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+// Customer getting data
+exports.getCustomerProfile = async (req, res) => {
+  try {
+    const user = await Customer.findById(req.user.id).select('-__v');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// PATCH /api/customer/update-avatar
+exports.custUpdateAvatar = async (req, res) => {
+  try {
+    const { avatar } = req.body;
+    const updated = await Customer.findByIdAndUpdate(req.user.id, { avatar }, { new: true });
+    res.json({message:"Avatar updated successfully"});
+  } catch (err) {
+    res.status(500).json({ message: 'Avatar update failed' });
+  }
+};
+
+exports.custUpdateInfo = async (req, res) => {
+  try {
+    const updated = await Customer.findByIdAndUpdate(
+      req.user.id,
+      {
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        dob: req.body.dob,
+        phone: req.body.phone,
+        location: req.body.location,
+      },
+      { new: true }
+    );
+    res.json({message:"Updated Successfully!"});
+  } catch (err) {
+    return res.status(500).json({ message: 'Failed to update info' });
+  }
+};
+
+// Change password for customer user
+exports.changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const customerId = req.user.id;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  try {
+    const customer = await Customer.findById(customerId);
+    if (!customer) return res.status(404).json({ message: 'Worker not found' });
+
+    const isMatch = await bcrypt.compare(currentPassword, customer.password);
+    if (!isMatch) return res.status(401).json({ message: 'Incorrect current password' });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+    customer.password = hashedNewPassword;
+    await customer.save();
+
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error while changing password' });
   }
 };
 
@@ -661,44 +737,46 @@ exports.getCustomerData = async (req,res) => {
 
 // CUSTOMER AND WORKER SERVICE REQUEST APIS
 // CUSTOMER-WORKER REQUEST API
-exports.getCustWorkReq= async (req, res) => {
+exports.getCustWorkReq = async (req, res) => {
   try {
-    const {
-      customerEmail,
-      customerFirstName,
-      customerLastName,
-      phoneNumber,
-      location,
-      serviceWanted,
-      workerEmail,
-      workerFirstName,
-      workerLastName
-    } = req.body;
-    console.log(req.body)
-    // Basic validation
-    if (!customerEmail || !customerFirstName || !customerLastName || !phoneNumber || !location || !serviceWanted || !workerEmail || !workerFirstName || !workerLastName) {
+    if (!req.body) {
+      return res.status(400).json({ message: "Missing request body" });
+    }
+
+    const { customerEmail, workerEmail, serviceWanted, customerLocation, scheduleDate, timeSlot   } = req.body;
+    console.log("Received req.body:", req.body);
+
+    if (!customerEmail || !workerEmail || !serviceWanted || !customerLocation) {
       return res.status(400).json({ message: "All required fields must be filled." });
     }
 
-    // Create new request
+    const customerUser = await Customer.findOne({ email: customerEmail });
+    if (!customerUser) return res.status(400).json({ message: "Customer Email not exist!" });
+
+    const workerUser = await Worker.findOne({ email: workerEmail });
+    if (!workerUser) return res.status(400).json({ message: "Worker Email not exist!" });
+
     const newRequest = new Request({
       customerEmail,
-      customerFirstName,
-      customerLastName,
-      phoneNumber,
-      location,
+      customerFirstName: customerUser.firstname,
+      customerLastName: customerUser.lastname,
+      customerPhoneNumber: customerUser.phone,
+      customerLocation,
       serviceWanted,
       workerEmail,
-      workerFirstName,
-      workerLastName
+      workerFirstName: workerUser.firstname,
+      workerLastName: workerUser.lastname,
+      workerPhoneNumber: workerUser.phone,
+      scheduleDate: new Date(scheduleDate),
+      timeSlot
     });
 
     await newRequest.save();
+    return res.status(201).json({ message: "Request sent successfully", data: newRequest });
 
-    res.status(201).json({ message: "Request sent successfully", data: newRequest });
   } catch (err) {
     console.error("Error sending request:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -715,7 +793,6 @@ exports.getAll=async(req,res)=>{
 
 // Get Particular Worker Records from Request Table
 
-
 exports.getAllByWork=async (req, res) => {
   try {
     const workerEmail = req.user.email; 
@@ -729,6 +806,46 @@ exports.getAllByWork=async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
+
+exports.getAllByCust=async (req, res) => {
+  try {
+    const customerEmail = req.user.email; 
+    console.log(customerEmail)
+
+    const requests = await Request.find({ customerEmail });
+    console.log({requests})
+
+    res.status(200).json({ success: true, data: requests });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server Error", error: error.message });
+  }
+};
+
+exports.customerCancelRequest = async (req, res) => {
+  try{
+    const { id } = req.params;
+  console.log(id)
+
+  const request = await Request.findById(id);
+
+  if (!request) {
+    return res.status(404).json({ message: "Request not found" });
+  }
+
+  if (request.workerStatus === "pending") {
+    request.workerStatus = "cancelled";
+    await request.save();
+    return res.json({ message: "Request cancelled due to no response" });
+  }
+  return res.status(400).json({ message: "Cannot cancel — already processed or invalid state." });
+}
+  catch(err){
+    return res.status(500).json({message:err.message})
+  }
+
+};
+
+
 
 exports.getChatRoomId = async (req, res) => {
   const { customerId, workerId } = req.params;

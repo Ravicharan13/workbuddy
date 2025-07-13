@@ -5,8 +5,6 @@ Content-Type: application/json
 {
     "email":"mrkumar1148@gmail.com",
     "password":"122003Kumar@"
-    "email":"charan.ganisetti@sasi.ac.in",
-    "password":"Charan@13"
 }
 
 ###
@@ -17,9 +15,9 @@ Content-Type: application/json
 
 ###
 
-# GET http://localhost:5000/api/auth/all
-# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjEzM2ZlYWEwOGU1YmVjOTM3MjdlZSIsImVtYWlsIjoibXJrdW1hcjExNDhAZ21haWwuY29tIiwiaWF0IjoxNzUxMjAwNzc3LCJleHAiOjE3NTEyMDE2Nzd9.oaBwLHUW0fwzVcrQeG4cMawbsRCwEoGqSJVY_CpB7b0
-###
+GET http://localhost:5000/api/auth/all
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NmY1MzY1NGIwZGNjY2EwNzMzNmQzMCIsImVtYWlsIjoibXJrdW1hcjExNDhAZ21haWwuY29tIiwicm9sZSI6IndvcmtlciIsImlhdCI6MTc1MjEyOTQ0OSwiZXhwIjoxNzUyMTMxMjQ5fQ.jN7ZLw-U3sSZIzIirb81bs7Y8lyMFQW4sMEjXKDhxOs
+##
 
 ### Register Worker
 ### Register Worker
@@ -70,6 +68,15 @@ Content-Type: application/json
 }
 
 ###
+PATCH http://localhost:5000/api/auth/worker/update-avatar
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NmY1MzY1NGIwZGNjY2EwNzMzNmQzMCIsImVtYWlsIjoibXJrdW1hcjExNDhAZ21haWwuY29tIiwicm9sZSI6IndvcmtlciIsImlhdCI6MTc1MjEyOTQ0OSwiZXhwIjoxNzUyMTMxMjQ5fQ.jN7ZLw-U3sSZIzIirb81bs7Y8lyMFQW4sMEjXKDhxOs
+Content-Type: application/json
+
+{
+  "avatar" : "https://res.cloudinary.com/dquha58yu/image/upload/v1751696351/img2_wlnuu6.jpg"
+}
+
+###
 POST http://localhost:5000/api/auth/customer/register
 Content-Type: application/json
 
@@ -103,11 +110,11 @@ Content-Type: application/json
 
 ###
 POST http://localhost:5000/api/auth/customer/getcustomer
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxMjE1Nzk4LCJleHAiOjE3NTEyMTY2OTh9.AhrY1lFu-lHc9j2w4Zxl9CJ-lHpKO0bVxawBhc3CR9o
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxODcwMjc5LCJleHAiOjE3NTE4NzIwNzl9.Z_iGPEB1Ohuk3iC9sWRc6N4_NbH-j8__16PSlTUk-uI
 Content-Type: application/json
 
 {
-  "email":"customer1@example.com"
+  "email":"jayakumar.gubbala@gmail.com"
 }
 
 ###
@@ -172,19 +179,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjIxMzIxN
 // WORKER-CUSTOMER REQUEST APIS
 ###
 POST http://localhost:5000/api/auth/workreq
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxNjAyMTY5LCJleHAiOjE3NTE2MDM5Njl9.qBII1gNqZpAFMULHB5XAW5j44EfGIltmPa9rgRDUsog
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NjE2ZTkzYWI4Njg4MGI5ZmNlMjAzYyIsImVtYWlsIjoiamF5YWt1bWFyLmd1YmJhbGFAZ21haWwuY29tIiwiaWF0IjoxNzUxODcyMDkzLCJleHAiOjE3NTE4NzM4OTN9.efWY117Tx5dcxv2BMvnH9c5VTBSsin5N5G1TYhffvB0
 Content-Type: application/json
 
 {
-  "customerEmail":"jayakumar.gubbala@gmail.com",
-  "customerFirstName":"G Jaya",
-  "customerLastName":"Kumar",
-  "phoneNumber":"8919753805",
-  "location":"Rjyk",
-  "serviceWanted":"Car Mech",
-  "workerEmail":"mrkumar1148@gmail.com",
-  "workerFirstName":"Jaya Kumar",
-  "workerLastName":"Gubbala"
+  "customerEmail": "jayakumar.gubbala@gmail.com",
+  "workerEmail": "mrkumar1148@gmail.com",
+  "serviceWanted": "Car Mech"
 }
 
 

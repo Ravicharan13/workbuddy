@@ -13,11 +13,11 @@ const workerRequestSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  phoneNumber: {
+  customerPhoneNumber: {
     type: String,
     required: true,
   },
-  location: {
+  customerLocation: {
     type: String,
     required: true,
   },
@@ -25,10 +25,16 @@ const workerRequestSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  workerPhoneNumber: {
+    type: String,
+    required: true,
+  },
+  scheduleDate: { type: Date, required: true }, // only the day (from DatePicker)
+  timeSlot: { type: String, required: true },
   workerStatus: {
     type: String,
-    enum: ["pending", "accepted", "rejected", "completed"],
-    default: "pending",
+    enum: ["pending", "accepted", "rejected", "cancelled", "completed"],
+    default: "pending"
   },
   workerEmail: { type: String, requird:true },
   workerFirstName: { type: String, required:true },
@@ -39,9 +45,9 @@ const workerRequestSchema = new mongoose.Schema({
     type: String, 
     default: null,
   },
-  timestamp: {
+  requestSentAt: {
     type: Date,
-    default: Date.now,
+    default: Date.now
   }
 });
 

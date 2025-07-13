@@ -9,8 +9,32 @@ const customerSchema = new mongoose.Schema({
   resetCode: { type: String },
   resetCodeExpires: { type: Date },
    resetCodeVerified : {type: Boolean},
-  phone: { type: String },            // Optional
-  location: { type: String }          // Optional
+  phone: { type: String },           
+  location: { type: String },     
+  role: {
+  type: String,
+  default: "customer",
+  enum: ["customer"],
+},
+dob: { type: Date },
+
+  gender: {
+    type: String,
+    enum: ['male', 'female'],
+    required: false
+  },
+  avatar: {
+    type: String,
+    default: function () {
+      // `this` refers to the document being created
+      if (this.gender === 'female') {
+        return 'https://res.cloudinary.com/dquha58yu/image/upload/v1751697562/female_m1dwf1.png';
+      } else {
+        return 'https://res.cloudinary.com/dquha58yu/image/upload/v1751697248/307ce493-b254-4b2d-8ba4-d12c080d6651_pty54f.jpg';
+      }
+    }
+  },
+
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

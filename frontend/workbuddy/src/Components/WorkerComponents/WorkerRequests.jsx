@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Clock } from 'lucide-react';
 import dayjs from 'dayjs';
 import Footer from '../WorkerHomePage/Footer';
 import { toast } from 'react-toastify';
@@ -30,10 +29,12 @@ export default function WorkerRequests() {
         id: item._id, // use MongoDB _id
         name: `${item.customerFirstName} ${item.customerLastName}`,
         email: item.customerEmail,
-        phone: item.phoneNumber,
-        location: item.location,
+        phone: item.customerPhoneNumber,
+        location: item.customerLocation,
         work: item.serviceWanted,
-        date: item.timestamp,
+        getDate: item.timestamp,
+        scheduleDate:item.scheduleDate,
+        timeSlot: item.timeSlot,
         status: item.workerStatus,
         reason: item.rejectReason,
       }));
@@ -127,17 +128,19 @@ export default function WorkerRequests() {
   );
 
   const sorted = [...filtered].sort((a, b) => {
-    const da = new Date(a.date);
-    const db = new Date(b.date);
-    return sortAsc ? da - db : db - da;
-  });
+  const da = new Date(a.scheduleDate);
+  const db = new Date(b.scheduleDate);
+  return sortAsc ? da - db : db - da;
+});
 
+  console.log(sorted)
   const statusColor = (status) => {
     switch (status) {
       case 'pending': return 'bg-gray-800 dark:bg-gray-900';
       case 'accepted': return 'bg-gray-800 dark:bg-gray-900';
       case 'completed': return 'bg-gray-800 dark:bg-gray-900';
       case 'rejected': return 'bg-gray-800 dark:bg-gray-900';
+      case 'cancelled': return 'bg-gray-800 dark:bg-gray-900';
       default: return 'bg-gray-600';
     }
   };
@@ -149,11 +152,11 @@ export default function WorkerRequests() {
 
         <div className="flex flex-wrap justify-between mb-6 gap-4">
           <div className="flex gap-4">
-            {['all', 'pending', 'accepted', 'rejected'].map(f => (
+            {['all', 'pending', 'accepted', 'completed', 'cancelled', 'rejected'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-2 py-1 md:px-4 md:py-2 rounded ${filter === f ? 'bg-primary text-white dark:bg-gray-800 dark:text-gray-50' : 'bg-white dark:bg-gray-50 dark:text-gray-900'}`}
+                className={`px-2 py-1 md:px-4 md:py-2 rounded-sm ${filter === f ? 'bg-gray-800 text-white dark:bg-gray-800 dark:text-gray-50' : 'bg-white dark:bg-gray-50 dark:text-gray-900'}`}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
@@ -161,7 +164,7 @@ export default function WorkerRequests() {
           </div>
           <button
             onClick={() => setSortAsc(!sortAsc)}
-            className="px-2 py-1 md:px-4 md:py-2 bg-white dark:bg-gray-50 dark:text-gray-900 rounded"
+            className="px-2 py-1 md:px-4 md:py-2 bg-white dark:bg-gray-800 dark:text-gray-50 rounded-sm"
           >
             Sort by {sortAsc ? 'Oldest' : 'Newest'}
           </button>
@@ -169,69 +172,104 @@ export default function WorkerRequests() {
 
         <div className="space-y-6">
           {sorted.map(req => (
-            <div key={req.id} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-lg md:text-xl font-semibold">{req.name}</h2>
-                  <p className="text-sm md:text-base text-gray-800">{req.email}</p>
-                  <p className="text-gray-500">{req.work} • {req.location}</p>
-                  <p className="text-gray-400 flex items-center gap-1 text-sm">
-                    <Clock className="w-3 h-3" /> {dayjs(req.date).format('dddd, MMMM D [at] h:mm A')}
-                  </p>
-                </div>
-                <span className={`text-sm text-white px-1 py-2 md:px-3 md:py-2 rounded ${statusColor(req.status)}`}>
-                  {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
-                </span>
-              </div>
+          <div
+            key={req.id}
+            className="bg-white dark:bg-gray-800 border-gray-500 dark:border-gray-700 rounded-sm p-6 mb-6"
+          >
+            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold text-gray-800 uppercase dark:text-white">
+                  Service Wanted: <span className="text-gray-800 rounded-sm  dark:bg-gray-900 px-2 py-1">{req.work}</span>
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300 text-base">
+                  <strong>Customer Name:</strong> <span className="text-gray-600 dark:text-gray-400">{req.name}</span>
+                </p>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  <strong>Email:</strong> <span className="text-gray-600 dark:text-gray-400">{req.email}</span>
+                </p>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  <strong>Phone:</strong> <span className="text-gray-600 dark:text-gray-400">{req.phone}</span>
+                </p>
+                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                  <strong>Location:</strong> <span className="text-gray-600 dark:text-gray-400">{req.location}</span>
+                </p>
+                <p className="text-gray-800 dark:bg-gray-900  dark:text-gray-300 text-sm bg-gray-200 p-1 text-center">
+                    <strong>Schedule Date:</strong> <span className="text-gray-700 dark:text-gray-300">{dayjs(req.scheduleDate).format('dddd, MMMM D, YYYY')}</span>
+                </p>
+                <p className="text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-sm bg-gray-100 p-1 text-center">
+                  <strong>Time Slot:</strong> <span className="text-gray-700 dark:text-gray-300">{req.timeSlot}</span>
+                </p>
 
-              {req.status === 'pending' && (
-                <div className="flex gap-3 mt-4">
-                  <button
-                    onClick={() => handleAccept(req.id)}
-                    className="bg-primary dark:bg-gray-900 text-white px-2 py-2 md:px-4 md:py-2 rounded duration-300 hover:bg-[#1c394755] dark:hover:bg-primary"
-                  >
-                    Accept
-                  </button>
-                  <button
-                    onClick={() => handleRejectClick(req.id)}
-                    className="border border-gray-200 dark:border-gray-700 px-2 py-2 md:px-4 md:py-2 rounded duration-300 hover:bg-gray-700 hover:text-white"
-                  >
-                    Reject
-                  </button>
+                {req.status==="cancelled" && (
+                <div>
+                  <span className='font-medium text-gray-500 text-sm italic'>Cancelled By Customer: {req.name}</span>
                 </div>
               )}
+              </div>
+              
+              <div className="flex flex-col items-end gap-4">
+                <span
+                  className={`text-xs text-white font-semibold px-3 py-2 rounded-sm ${statusColor(req.status)} shadow-sm`}
+                >
+                  Status: {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                </span>
 
-              {rejectingId === req.id && (
-                <div className="mt-4">
-                  <textarea
-                    rows="2"
-                    className="w-full p-2 bg-gray-50 border border-gray-600 rounded-sm text-gray-900"
-                    placeholder="Enter reason for rejection..."
-                    value={reasonInput}
-                    onChange={(e) => setReasonInput(e.target.value)}
-                  />
-                  <div className="flex gap-2 mt-2">
+                {req.status === 'pending' && (
+                  <div className="flex gap-3 mt-2">
                     <button
-                      onClick={() => handleReasonSubmit(req.id)}
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                      onClick={() => handleAccept(req.id)}
+                      className="bg-gray-800 hover:bg-gray-700 text-base text-white px-5 py-1 rounded-sm duration-300"
                     >
-                      Submit Reason
+                      Accept
                     </button>
                     <button
-                      onClick={() => { setRejectingId(null); setReasonInput(''); }}
-                      className="px-3 py-1 rounded border border-gray-500 hover:bg-gray-700"
+                      onClick={() => handleRejectClick(req.id)}
+                      className="border border-gray-100 dark:border-gray-500 text-base text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 px-5 py-1 rounded-sm duration-300"
                     >
-                      Cancel
+                      Reject
                     </button>
                   </div>
-                </div>
-              )}
-
-              {req.status === 'rejected' && req.reason && (
-                <p className="text-sm text-red-400 mt-3">Reason: {req.reason}</p>
-              )}
+                )}
+              </div>
             </div>
-          ))}
+
+            {rejectingId === req.id && (
+              <div className="mt-4">
+                <textarea
+                  rows="2"
+                  className="w-full p-3 rounded-sm border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-800"
+                  placeholder="Enter reason for rejection..."
+                  value={reasonInput}
+                  onChange={(e) => setReasonInput(e.target.value)}
+                />
+                <div className="flex gap-3 mt-3">
+                  <button
+                    onClick={() => handleReasonSubmit(req.id)}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-sm"
+                  >
+                    Submit Reason
+                  </button>
+                  <button
+                    onClick={() => {
+                      setRejectingId(null);
+                      setReasonInput('');
+                    }}
+                    className="border border-gray-500 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 rounded-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {req.status === 'rejected' && req.reason && (
+              <p className="text-sm text-red-500 mt-4 font-semibold italic">
+                Reason: {req.reason}
+              </p>
+            )}
+          </div>
+))}
+
         </div>
       </div>
       <Footer />

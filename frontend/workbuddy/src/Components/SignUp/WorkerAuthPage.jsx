@@ -59,6 +59,8 @@ const WorkerAuthPage = () => {
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
     localStorage.setItem("username", data.username);
+    localStorage.setItem("email",data.email)
+    localStorage.setItem("role",data.role)
     setUser({ username: data.username });
 
     navigate("/worker/home")
@@ -152,7 +154,7 @@ const WorkerAuthPage = () => {
                 setStep(1);
               }}
             >
-              SIGN UP
+              LOGIN
             </button>
             <button
               className={`pb-2 font-semibold text-sm ${
@@ -160,153 +162,13 @@ const WorkerAuthPage = () => {
               }`}
               onClick={() => setIsSignup(false)}
             >
-              LOGIN
+              SIGN UP
             </button>
           </div>
 
           {isSignup ? (
             <>
-            <h2 className="mb-4">
-            <span className="block text-xl font-bold text-gray-900 dark:text-gray-50">Worker Registration</span>
-            <h2 className="text-base font-medium mt-1 dark:text-gray-50 text-gray-900">Get Started!</h2>
-            <span className="block text-sm text-gray-500 mt-1">
-                Create your profile, showcase your skills, and start getting jobs.
-            </span>
-            </h2>
-              <form className="space-y-1 text-sm">
-                {step === 1 && (
-                  <>
-                    <div>
-                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Email*</label>
-                      <input
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
-                        type="email"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-600 font-semibold dark:text-gray-50">First Name*</label>
-                      <input
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
-                        type="text"
-                        placeholder="First name"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Last Name*</label>
-                      <input
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
-                        type="text"
-                        placeholder="Last name"
-                      />
-                    </div>
-
-                    <div className="flex justify-end py-2 pt-4 dark:text-gray-50">
-                      <button
-                        type="button"
-                        className="w-[28%] bg-gray-700 duration-300 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
-                        onClick={handleNext}
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {step === 2 && (
-                <>
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Username*</label>
-                    <input
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
-                      type="text"
-                      placeholder="Choose a username"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Password*</label>
-                    <input
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create password"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Confirm Password*</label>
-                    <input
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Repeat password"
-                    />
-                  </div>
-
-                  <div className="flex items-center space-x-2 dark:text-gray-50 pt-2">
-                    <input
-                      id="showPasswordSignup"
-                      type="checkbox"
-                      checked={showPassword}
-                      onChange={() => setShowPassword(!showPassword)}
-                      className="accent-blue-600"
-                    />
-                    <label htmlFor="showPasswordSignup" className="text-gray-600 text-sm dark:text-gray-50">
-                      Show Password
-                    </label>
-                  </div>
-
-                  <div className="flex justify-between pt-4">
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className="w-[28%] bg-gray-400 duration-300 dark:bg-gray-700 dark:hover:bg-gray-400 text-white py-1 rounded-sm hover:bg-gray-400"
-                    >
-                      Previous
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleSignup}
-                      className="w-[48%] bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
-                    >
-                      Sign Up
-                    </button>
-                  </div>
-
-                  <p className="text-center pt-3 dark:text-gray-50">
-                    Already have an account?{" "}
-                    <span className="text-gray-600 cursor-pointer" onClick={() => setIsSignup(false)}>
-                      Login now
-                    </span>
-                  </p>
-                </>
-              )}
-
-              </form>
-            </>
-          ) : (
-            <>
-      <h1 className="text-xl font-bold mb-2 dark:text-gray-50">Worker Login</h1>
+      <h1 className="text-xl uppercase font-bold mb-2 dark:text-gray-50">Worker Login</h1>
       <h2 className="text-base font-medium mb-1 dark:text-gray-50">Good to See You Again!</h2>
       <p className="text-xs text-gray-500 mb-4">
         Log in and pick up where you left off — new requests may be waiting!
@@ -320,9 +182,9 @@ const WorkerAuthPage = () => {
             name="email"
             type="email"
             value={email}
-            placeholder="Enter your email"
+            placeholder="Enter your email address"
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
+            className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
             required
           />
         </div>
@@ -336,7 +198,7 @@ const WorkerAuthPage = () => {
             value={password}
             placeholder="Enter your password"
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
+            className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
             required
           />
         </div>
@@ -384,25 +246,168 @@ const WorkerAuthPage = () => {
       </form>
     </>
               
-          )}
+          ):
+          (
+            <>
+            <h2 className="mb-4">
+            <span className="block text-xl uppercase font-bold text-gray-900 dark:text-gray-50">Worker Registration</span>
+            <h2 className="text-base font-medium mt-2 dark:text-gray-50 text-gray-900">Get Started!</h2>
+            <span className="block text-sm text-gray-500 mt-2">
+                Create your profile, showcase your skills, and start getting jobs.
+            </span>
+            </h2>
+              <form className="space-y-1 text-sm">
+                {step === 1 && (
+                  <>
+                    <div>
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Email*</label>
+                      <input
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type="email"
+                        placeholder="Enter your email"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">First Name*</label>
+                      <input
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type="text"
+                        placeholder="Enter your First name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Last Name*</label>
+                      <input
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type="text"
+                        placeholder="Enter your Last name"
+                      />
+                    </div>
+
+                    <div className="flex justify-end py-2 pt-4 dark:text-gray-50">
+                      <button
+                        type="button"
+                        className="w-[28%] bg-gray-700 duration-300 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
+                        onClick={handleNext}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {step === 2 && (
+                <>
+                  <div>
+                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Username*</label>
+                    <input
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                      type="text"
+                      placeholder="Choose an username"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Password*</label>
+                    <input
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create your password"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Confirm Password*</label>
+                    <input
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Repeat your password"
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2 dark:text-gray-50 pt-2">
+                    <input
+                      id="showPasswordSignup"
+                      type="checkbox"
+                      checked={showPassword}
+                      onChange={() => setShowPassword(!showPassword)}
+                      className="accent-blue-600"
+                    />
+                    <label htmlFor="showPasswordSignup" className="text-gray-600 text-sm dark:text-gray-50">
+                      Show Password
+                    </label>
+                  </div>
+
+                  <div className="flex justify-between pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="w-[28%] bg-gray-400 duration-300 dark:bg-gray-700 dark:hover:bg-gray-400 text-white py-1 rounded-sm hover:bg-gray-400"
+                    >
+                      Previous
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSignup}
+                      className="w-[48%] bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+
+                  <p className="text-center pt-3 dark:text-gray-50">
+                    Already have an account?{" "}
+                    <span className="text-gray-600 cursor-pointer" onClick={() => setIsSignup(false)}>
+                      Login now
+                    </span>
+                  </p>
+                </>
+              )}
+
+              </form>
+            </>
+          )
+          }
         </div>
 
         {/* Right side */}
-        <div className="w-full md:w-2/3 bg-gray-800 dark:bg-gray-900 flex flex-col items-center justify-center p-8 space-y-2">
-          <img src={customer} alt="" className="w-32 h-32 bg-gray-300 rounded-sm" />
-          <h3 className="text-xl font-semibold text-gray-50">Customer</h3>
+        <div className="w-full md:w-2/3 bg-gray-800 dark:bg-gray-900 flex flex-col items-center justify-center p-8 space-y-1">
+          <img src={customer} alt="" className="w-24 h-24 bg-gray-300 rounded-sm" />
+          <h3 className="text-base font-semibold text-gray-200 uppercase">Customer</h3>
+          <br />
           <Link
             to="/customerauth?mode=login"
-            className="w-[24%] bg-gray-600 text-white py-2 rounded-sm duration-300 hover:bg-gray-700 text-center text-xs font-semibold"
+            className="text-gray-50 hover:text-gray-500 py-0 rounded-sm duration-300 text-center text-base underline underline-offset-4 decoration-gray-500 font-normal"
           >
-            Login
+            Login as Customer
           </Link>
-          <p className="text-gray-50">Or</p>
+          <p className="text-gray-50 py-1 pt-2">Or</p>
           <Link
             to="/customerauth?mode=signup"
-            className="w-[24%] bg-gray-50 text-gray-800 py-2 rounded-sm duration-300 hover:bg-white text-center text-xs font-semibold"
+            className="text-gray-50 hover:text-gray-500 py-0 rounded-sm duration-300 text-center text-base underline underline-offset-4 decoration-gray-500 font-normal"
           >
-            Register
+            Register as Customer
           </Link>
         </div>
       </div>

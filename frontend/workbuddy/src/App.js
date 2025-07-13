@@ -17,6 +17,8 @@ import WorkerProfileUpdate from "./Components/WorkerProfileUpdate"
 import CustomerHome from "./Components/Customer/Home/Home"
 import BrowseServicesPage from "./Components/Customer/Services/BrowseServicesPage";
 import TrackRequestPage from "./Components/Customer/Services/TrackRequestPage";
+import Unauthorized from "./Components/SignUp/Unauthorized";
+import CustomerProfileUpdate from "./Components/CustomerProfileUpdate/index"
 
 
 function App() {
@@ -26,6 +28,7 @@ function App() {
         <Navbar />
         <div className="App">
           <Routes>
+            <Route path="/unauthorized" element={<Unauthorized />} />
             <Route
               path="/"
               element={
@@ -69,7 +72,7 @@ function App() {
             <Route
               path="/worker/home"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute role="worker">
                   <WorkerHome />
                 </ProtectedRoute>
               }
@@ -77,7 +80,7 @@ function App() {
             <Route
               path="/worker/requests"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute role="worker">
                   <WorkerRequests />
                 </ProtectedRoute>
               }
@@ -85,7 +88,7 @@ function App() {
             <Route
               path="/worker/profile-update"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute role="worker">
                   <WorkerProfileUpdate />
                 </ProtectedRoute>
               }
@@ -93,7 +96,7 @@ function App() {
             <Route
               path="/customer/home"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute role="customer">
                   <CustomerHome />
                 </ProtectedRoute>
               }
@@ -101,16 +104,24 @@ function App() {
             <Route
               path="/customer/services"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute role="customer">
                   <BrowseServicesPage />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/customer/service/track-request"
+              path="/customer/services/track-request"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute role="customer">
                   <TrackRequestPage />
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="/customer/profile-update"
+              element={
+                <ProtectedRoute role="customer">
+                  <CustomerProfileUpdate/>
                 </ProtectedRoute>
               }
             />

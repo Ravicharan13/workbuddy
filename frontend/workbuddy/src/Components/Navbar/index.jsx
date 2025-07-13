@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { Moon, Sun, Menu, X, CircleUserRound } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
+import { getRole } from '../SignUp/auth';
+
 
 const Navbar = () => {
   const [isDark, setIsDark] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const currentRole = getRole();
 
   const { user, setUser } = useUser(); // ✅ correct usage
 
@@ -43,14 +46,77 @@ const Navbar = () => {
           {/* Desktop Menu */}
           <div className="hidden md:flex md:space-x-8 lg:space-x-20 text-sm font-medium">
             {isLoggedIn && (
-              <>
-              <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Home</Link>
-                <Link to="worker/requests" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Requests</Link>
-                <Link to="/messages" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Messages</Link>
-                <Link to="/earnings" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Earnings</Link>
-                <Link to="worker/profile-update" className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Profile</Link>
-              </>
-            )}
+                  <>
+                    {currentRole === "worker"?<Link
+                      to="/worker/home"
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
+                    >
+                      Home
+                    </Link>:<Link
+                      to="/customer/home"
+                      className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
+                    >
+                      Home
+                    </Link>}
+
+                    {currentRole === "worker" ? (
+                      <>
+                        <Link
+                          to="/worker/requests"
+                          className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
+                        >
+                          Requests
+                        </Link>
+                        <Link
+                          to="/messages"
+                          className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
+                        >
+                          Messages
+                        </Link>
+                        <Link
+                          to="/earnings"
+                          className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
+                        >
+                          Earnings
+                        </Link>
+                        <Link
+                          to="/worker/profile-update"
+                          className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
+                        >
+                          Profile
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          to="/customer/services"
+                          className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
+                        >
+                          Browse Services
+                        </Link>
+                        <Link
+                          to="/customer/services/track-request"
+                          className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
+                        >
+                          My Requests
+                        </Link>
+                        <Link
+                          to="/messages"
+                          className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
+                        >
+                          Messages
+                        </Link>
+                        <Link
+                          to="/customer/profile-update"
+                          className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
+                        >
+                          Profile
+                        </Link>
+                      </>
+                    )}
+                  </>
+                )}
+
             
           </div>
 

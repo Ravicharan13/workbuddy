@@ -78,14 +78,13 @@ const handleInputChange = (e) => {
     try {
       setImage(imgUrl);
       const token = localStorage.getItem('accessToken');
-      await axios.patch('http://localhost:5000/api/auth/worker/update-avatar', {
+      const res = await axios.patch('http://localhost:5000/api/auth/worker/update-avatar', {
         avatar: imgUrl,
       }, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
       setProfile(prev => ({ ...prev, avatar: imgUrl }));
       toast.success("Avatar updated!");
       setShowAvatars(false);

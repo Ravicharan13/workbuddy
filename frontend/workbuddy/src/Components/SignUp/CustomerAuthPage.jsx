@@ -113,7 +113,9 @@ const CustomerAuthPage = () => {
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("refreshToken", data.refreshToken);
     localStorage.setItem("username", data.username);
-    navigate("/worker/home")
+    localStorage.setItem("email",data.email);
+    localStorage.setItem("role",data.role)
+    navigate("/customer/home")
     // Optional: navigate to dashboard
     // navigate("/customer/dashboard");
 
@@ -128,26 +130,27 @@ const CustomerAuthPage = () => {
       <div className="w-full h-[90%] max-w-6xl bg-white dark:bg-gray-800 dark:rounded-sm shadow-sm dark:shadow-slate-700 flex flex-col md:flex-row overflow-hidden">
 
         {/* Left - Worker Options */}
-        <div className="w-full md:w-2/3 bg-gray-800 dark:bg-gray-900 flex flex-col items-center justify-center p-8 space-y-2">
-          <img src={worker} alt="" className="w-32 h-32 bg-gray-300 rounded-sm" />
-          <h3 className="text-xl font-semibold text-white">Worker</h3>
+        <div className="w-full md:w-2/3 bg-gray-800 dark:bg-gray-900 flex flex-col items-center justify-center p-8 space-y-1">
+          <img src={worker} alt="" className="w-24 h-24 bg-gray-300 rounded-sm" />
+          <h3 className="text-base font-semibold text-gray-200 uppercase">Worker</h3>
+           <br />
           <Link
             to="/workerauth?mode=login"
-            className="w-[24%] bg-gray-600 text-white py-2 rounded-sm hover:bg-gray-700 text-center text-xs font-semibold"
+           className="text-gray-50 hover:text-gray-500 py-0 rounded-sm duration-300 text-center text-base underline underline-offset-4 decoration-gray-500 font-normal"
           >
-            Login
+            Login as Worker
           </Link>
-          <p className="text-white">Or</p>
+          <p className="text-gray-50 py-1 pt-2">Or</p>
           <Link
             to="/workerauth?mode=signup"
-            className="w-[24%] bg-white text-gray-800 py-2 rounded-sm hover:bg-gray-100 text-center text-xs font-semibold"
+            className="text-gray-50 hover:text-gray-500 py-0 rounded-sm duration-300 text-center text-base underline underline-offset-4 decoration-gray-500 font-normal"
           >
-            Register
+            Register as Worker
           </Link>
         </div>
 
         {/* Right - Form Section */}
-        <div className="w-full h-full md:w-2/3 px-10 py-6 bg-white dark:bg-gray-800">
+        <div className="w-full h-full md:w-2/3 px-10 py-6  bg-white dark:bg-gray-800">
           <div className="flex space-x-6 border-b dark:border-gray-500 mb-4">
             <button
               className={`pb-2 font-semibold text-sm ${isSignup ? "border-b-2 border-gray-800 dark:text-white text-gray-800" : "text-gray-600 dark:text-gray-400"}`}
@@ -156,159 +159,19 @@ const CustomerAuthPage = () => {
                 setStep(1);
               }}
             >
-              SIGN UP
+              LOGIN
             </button>
             <button
               className={`pb-2 font-semibold text-sm ${!isSignup ? "border-b-2 border-gray-800  text-gray-800 dark:text-white" : "text-gray-600 dark:text-gray-400"}`}
               onClick={() => setIsSignup(false)}
             >
-              LOGIN
+              SIGN UP
             </button>
           </div>
 
           {isSignup ? (
             <>
-              <h2 className="mb-4">
-                <span className="block text-xl font-bold text-gray-900 dark:text-gray-50">Customer Registration</span>
-                <h2 className="text-base font-medium mt-1 dark:text-gray-50 text-gray-900">Get Started!</h2>
-                <span className="block text-sm text-gray-500 mt-1">
-                  Create your account and enjoy personalized services.
-                </span>
-              </h2>
-              <form className="space-y-1 text-sm">
-                {step === 1 && (
-                  <>
-                    <div>
-                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Email*</label>
-                      <input
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
-                        type="email"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-600 font-semibold dark:text-gray-50">First Name*</label>
-                      <input
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleChange}
-                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-600 focus:outline-none focus:border-gray-600 px-1 py-2"
-                        type="text"
-                        placeholder="First name"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-600 font-semibold dark:text-gray-50" >Last Name*</label>
-                      <input
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleChange}
-                        className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2"
-                        type="text"
-                        placeholder="Last name"
-                      />
-                    </div>
-
-                    <div className="flex justify-end py-2 pt-8 dark:text-gray-50">
-                      <button
-                        type="button"
-                        className="w-[28%] bg-gray-700 duration-300 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
-                        onClick={handleNext}
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {step === 2 && (
-                <>
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Username*</label>
-                    <input
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2"
-                      type="text"
-                      placeholder="Choose a username"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Password*</label>
-                    <input
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create password"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Confirm Password*</label>
-                    <input
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Repeat password"
-                    />
-                  </div>
-
-                  <div className="flex items-center space-x-2 dark:text-gray-50 pt-2">
-                    <input
-                      id="showPasswordSignup"
-                      type="checkbox"
-                      checked={showPassword}
-                      onChange={() => setShowPassword(!showPassword)}
-                      className="accent-blue-600"
-                    />
-                    <label htmlFor="showPasswordSignup" className="text-gray-600 text-sm dark:text-gray-50">
-                      Show Password
-                    </label>
-                  </div>
-
-                  <div className="flex justify-between pt-4">
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className="w-[28%] bg-gray-400 duration-300 dark:bg-gray-700 dark:hover:bg-gray-400 text-white py-1 rounded-sm hover:bg-gray-400"
-                    >
-                      Previous
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleSignup}
-                      className="w-[48%] bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
-                    >
-                      Sign Up
-                    </button>
-                  </div>
-
-                  <p className="text-center pt-3 dark:text-gray-50">
-                    Already have an account?{' '}
-                    <span className="text-gray-600 cursor-pointer" onClick={() => setIsSignup(false)}>
-                      Login now
-                    </span>
-                  </p>
-                </>
-              )}
-
-              </form>
-            </>
-          ) : (
-            <>
-              <h1 className="text-xl font-bold mb-2 dark:text-gray-50">Customer Login</h1>
+              <h1 className="text-xl font-bold mb-2 uppercase dark:text-gray-50">Customer Login</h1>
               <h2 className="text-base font-medium mb-1 dark:text-gray-50">Welcome Back!</h2>
               <p className="text-xs text-gray-500 mb-4">
                 Log in and explore available services tailored for you.
@@ -324,7 +187,7 @@ const CustomerAuthPage = () => {
                     value={email}
                     placeholder="Enter your email"
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
+                    className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
                     required
                   />
                 </div>
@@ -338,7 +201,7 @@ const CustomerAuthPage = () => {
                     value={password}
                     placeholder="Enter your password"
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2"
+                    className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
                     required
                   />
                 </div>
@@ -384,7 +247,149 @@ const CustomerAuthPage = () => {
                 </div>
               </form>
             </>
-          )}
+          ):
+          (
+            <>
+              <h2 className="mb-4">
+                <span className="block text-xl uppercase font-bold text-gray-900 dark:text-gray-50">Customer Registration</span>
+                <h2 className="text-base font-medium mt-1 dark:text-gray-50 text-gray-900">Get Started!</h2>
+                <span className="block text-sm text-gray-500 mt-1">
+                  Create your account and enjoy personalized services.
+                </span>
+              </h2>
+              <form className="space-y-1 text-sm">
+                {step === 1 && (
+                  <>
+                    <div>
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Email*</label>
+                      <input
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type="email"
+                        placeholder="Enter your email"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">First Name*</label>
+                      <input
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-600 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type="text"
+                        placeholder="Enter your First name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50" >Last Name*</label>
+                      <input
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type="text"
+                        placeholder="Enter your Last name"
+                      />
+                    </div>
+
+                    <div className="flex justify-end py-2 pt-8 dark:text-gray-50">
+                      <button
+                        type="button"
+                        className="w-[28%] bg-gray-700 duration-300 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
+                        onClick={handleNext}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {step === 2 && (
+                <>
+                  <div>
+                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Username*</label>
+                    <input
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                      type="text"
+                      placeholder="Choose an username"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Password*</label>
+                    <input
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create your password"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Confirm Password*</label>
+                    <input
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Repeat your password"
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2 dark:text-gray-50 pt-2">
+                    <input
+                      id="showPasswordSignup"
+                      type="checkbox"
+                      checked={showPassword}
+                      onChange={() => setShowPassword(!showPassword)}
+                      className="accent-blue-600"
+                    />
+                    <label htmlFor="showPasswordSignup" className="text-gray-600 text-sm dark:text-gray-50">
+                      Show Password
+                    </label>
+                  </div>
+
+                  <div className="flex justify-between pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="w-[28%] bg-gray-400 duration-300 dark:bg-gray-700 dark:hover:bg-gray-400 text-white py-1 rounded-sm hover:bg-gray-400"
+                    >
+                      Previous
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleSignup}
+                      className="w-[48%] bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+
+                  <p className="text-center pt-3 dark:text-gray-50">
+                    Already have an account?{' '}
+                    <span className="text-gray-600 cursor-pointer" onClick={() => setIsSignup(false)}>
+                      Login now
+                    </span>
+                  </p>
+                </>
+              )}
+
+              </form>
+            </>
+          ) 
+        }
         </div>
       </div>
     </div>

@@ -44,7 +44,13 @@ const workerSchema = new mongoose.Schema({
   skills:     { type: [String], default: [] },  // Optional, defaults to empty array
   phone:      { type: String },                 // Optional
   location:   { type: String },                 // Optional                // Optional, separate from `services` array
-  description:{ type: String }                  // Optional, profile bio or about text
+  description:{ type: String },               // Optional, profile bio or about text
+  role: {
+  type: String,
+  default: "worker",
+  enum: ["worker"],
+},
+
 
 }, {
   timestamps: true,
