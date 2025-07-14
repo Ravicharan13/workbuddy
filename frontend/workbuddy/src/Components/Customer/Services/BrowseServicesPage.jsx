@@ -172,7 +172,7 @@ const handleSubmitRequest = async () => {
 
   return (
     <>
-      <div className="w-[85%] h-[90vh] mx-auto p-6">
+      <div className="w-full h-[90vh] dark:text-gray-50 dark:bg-gray-900 px-36 py-10">
         <h1 className="text-3xl font-bold mb-2">Browse Services</h1>
         <p className="text-gray-600 mb-6">Find the right worker for your needs and request service easily.</p>
 
@@ -183,33 +183,33 @@ const handleSubmitRequest = async () => {
           <input
             type="text"
             placeholder="Search by name, service, or description"
-            className="w-full px-3 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-600 border-gray-100"
+            className="w-full px-3 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-600 border-gray-100 dark:focus:border-gray-500  dark:border-gray-700 dark:bg-gray-900"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
 
-          <select className="border rounded-sm px-3 py-2" value={location} onChange={(e) => setLocation(e.target.value)}>
+          <select className="border rounded-sm px-3 py-2 dark:focus:border-gray-500  dark:border-gray-700 dark:bg-gray-900" value={location} onChange={(e) => setLocation(e.target.value)}>
             <option value="">All Locations</option>
             {uniqueLocations.map((loc, idx) => (
               <option key={idx} value={loc}>{loc}</option>
             ))}
           </select>
 
-          <select className="border rounded-sm px-3 py-2" value={service} onChange={(e) => setService(e.target.value)}>
+          <select className="border rounded-sm px-3 py-2 dark:focus:border-gray-500  dark:border-gray-700 dark:bg-gray-900" value={service} onChange={(e) => setService(e.target.value)}>
             <option value="">All Services</option>
             {uniqueServices.map((srv, idx) => (
               <option key={idx} value={srv}>{srv}</option>
             ))}
           </select>
 
-          <select className="border rounded-sm px-3 py-2" value={availability} onChange={(e) => setAvailability(e.target.value)}>
+          <select className="border rounded-sm px-3 py-2 dark:focus:border-gray-500  dark:border-gray-700 dark:bg-gray-900" value={availability} onChange={(e) => setAvailability(e.target.value)}>
             <option value="">Any Availability</option>
             {uniqueAvailability.map((av, idx) => (
               <option key={idx} value={av}>{av}</option>
             ))}
           </select>
 
-          <select className="border rounded-sm px-3 py-2" value={rating} onChange={(e) => setRating(e.target.value)}>
+          <select className="border rounded-sm px-3 py-2 dark:focus:border-gray-500  dark:border-gray-700 dark:bg-gray-900" value={rating} onChange={(e) => setRating(e.target.value)}>
             <option value="">All Ratings</option>
             {[5, 4, 3, 2, 1].map((r) => (
               <option key={r} value={r}>{r} stars & up</option>
@@ -219,7 +219,7 @@ const handleSubmitRequest = async () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {paginatedWorkers.map((worker, index) => (
-            <div key={index} className="border rounded-sm shadow-sm p-4 bg-white">
+            <div key={index} className="border rounded-sm shadow-sm p-4 bg-white dark:border-gray-800 dark:bg-gray-900">
               <div className="flex items-center gap-4">
                 <img
                   src={worker.avatar || 'https://via.placeholder.com/48'}
@@ -302,18 +302,18 @@ const handleSubmitRequest = async () => {
 
         {selectedWorker && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-sm shadow-xl max-w-md w-full">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-sm shadow-xl max-w-md w-full">
               <h2 className="text-xl font-bold mb-2">{selectedWorker.firstname + ' ' + selectedWorker.lastname}</h2>
-              <p className="text-gray-600 mb-1">
+              <p className="text-gray-700 mb-1">
                 <strong>Location:</strong> {selectedWorker.location}
               </p>
-              <p className="text-gray-600 mb-1">
+              <p className="text-gray-700 mb-1">
                 <strong>Availability:</strong> {selectedWorker.availability || 'N/A'}
               </p>
-              <p className="text-gray-600 mb-1">
+              <p className="text-gray-700 mb-1">
                 <strong>Rating:</strong> {selectedWorker.rating || 'N/A'}
               </p>
-              <p className="text-gray-600 mb-1">
+              <p className="text-gray-700 mb-1">
                 <strong>Services:</strong> {selectedWorker.services?.map(s => typeof s === 'string' ? s : s.name).join(', ')}
               </p>
               <p className="text-gray-600 mb-4">{selectedWorker.description || 'No description available.'}</p>
@@ -331,21 +331,21 @@ const handleSubmitRequest = async () => {
 
         {confirmRequest && !showServiceForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-sm shadow-xl max-w-sm w-full text-center">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-sm shadow-xl max-w-sm w-full text-center">
               <p className="mb-4">
                 Do you want to request service from <strong>{confirmRequest.firstname}</strong>?
               </p>
               <div className="flex justify-center gap-4">
                 <button
                     onClick={() => setShowServiceForm(true)} // ✅ wrapped in a function
-                    className="px-4 py-2 bg-gray-800 text-white rounded-sm hover:bg-gray-600"
+                    className="px-4 py-2 bg-gray-800  duration-300 text-white rounded-sm hover:bg-gray-600"
                   >
                     Confirm
                   </button>
 
                 <button
                   onClick={() => setConfirmRequest(null)}
-                  className="px-4 py-2 bg-gray-300 rounded-sm hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-300 dark:bg-gray-500 duration-300 rounded-sm hover:bg-gray-400"
                 >
                   Cancel
                 </button>
@@ -356,16 +356,16 @@ const handleSubmitRequest = async () => {
 
         {confirmRequest && showServiceForm && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white p-6 rounded-sm shadow-xl max-w-sm w-full space-y-4">
+    <div className="bg-white dark:bg-gray-900 p-6 rounded-sm shadow-xl max-w-sm w-full space-y-4">
       <h2 className="text-lg font-semibold mb-2 text-center">
-        Request a service from <span className="text-gray-800 font-bold">{confirmRequest.firstname}</span>
+        Request a service from <span className="text-gray-800 font-bold dark:text-gray-300">{confirmRequest.firstname}</span>
       </h2>
 
       {/* Select Service */}
       <select
         value={selectedService}
         onChange={(e) => setSelectedService(e.target.value)}
-           className="w-full px-3 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-600 border-gray-100"
+           className="w-full px-3 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-600 border-gray-100 dark:focus:border-gray-500  dark:border-gray-700 dark:bg-gray-900"
       >
         <option value="">Select a service</option>
         {confirmRequest.services.map((s, idx) => (
@@ -379,7 +379,7 @@ const handleSubmitRequest = async () => {
         value={userLocation}
         onChange={(e) => setUserLocation(e.target.value)}
         placeholder="Enter your location"
-        className="w-full px-3 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-600 border-gray-100"
+        className="w-full px-3 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-600 border-gray-100 dark:focus:border-gray-500  dark:border-gray-700 dark:bg-gray-900"
       />
 
       {/* Select Date */}
@@ -388,7 +388,7 @@ const handleSubmitRequest = async () => {
         onChange={(date) => setSelectedDate(date)}
         minDate={new Date()}
         dateFormat="yyyy/MM/dd"
-        className="w-full px-3 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-600 border-gray-100"
+        className="w-full px-28 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-600 border-gray-100 dark:focus:border-gray-500  dark:border-gray-700 dark:bg-gray-900"
         placeholderText="Select a date"
       />
 
@@ -396,7 +396,7 @@ const handleSubmitRequest = async () => {
       <select
         value={selectedTimeSlot}
         onChange={(e) => setSelectedTimeSlot(e.target.value)}
-        className="w-full px-3 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-600 border-gray-100"
+        className="w-full px-3 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-600 border-gray-100 dark:focus:border-gray-500  dark:border-gray-700 dark:bg-gray-900"
       >
         <option value="">Select a time slot</option>
         {[
@@ -415,7 +415,7 @@ const handleSubmitRequest = async () => {
       <div className="flex justify-center gap-4 pt-2">
         <button
           onClick={handleSubmitRequest}
-          className="px-4 py-2 bg-gray-800 text-white rounded-sm hover:bg-gray-700 duration-300"
+          className="px-4 py-2 bg-gray-800 text-white rounded-sm hover:bg-gray-700 duration-300 "
           disabled={!selectedService || !userLocation || !selectedDate || !selectedTimeSlot}
         >
           Submit
@@ -429,7 +429,7 @@ const handleSubmitRequest = async () => {
             setSelectedDate(null);
             setSelectedTimeSlot('');
           }}
-          className="px-4 py-2 bg-gray-200 rounded-sm hover:bg-gray-400 duration-300"
+          className="px-4 py-2 bg-gray-200 dark:bg-gray-500 rounded-sm hover:bg-gray-400 duration-300"
         >
           Cancel
         </button>

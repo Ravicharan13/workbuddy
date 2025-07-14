@@ -7,29 +7,26 @@ module.exports = (io) => {
   io.on("connection", (socket) => {
     console.log("🟢 New client connected:", socket.id);
 
-    // User joins a specific chat room
+    // Join chat room
     socket.on("joinRoom", ({ email, chatRoomId }) => {
       socket.join(chatRoomId);
       userSockets[email] = socket.id;
       console.log(`👤 ${email} joined room ${chatRoomId}`);
     });
 
-    // Handle user typing
+    // Handle typing
     socket.on("typing", ({ chatRoomId, userEmail }) => {
-      // Broadcast to others in room
       socket.to(chatRoomId).emit("typing", { userEmail });
 
-      // Clear old timeout if exists
       if (typingTimers[userEmail]) clearTimeout(typingTimers[userEmail]);
 
-      // Emit stopTyping after 2 seconds of inactivity
       typingTimers[userEmail] = setTimeout(() => {
         socket.to(chatRoomId).emit("stopTyping");
         delete typingTimers[userEmail];
       }, 2000);
     });
 
-    // Handle incoming message
+    // Handle message send
     socket.on("sendMessage", async (data) => {
       try {
         const { chatRoomId, message, sender, senderEmail } = data;
@@ -44,19 +41,46 @@ module.exports = (io) => {
           message: message.trim(),
           sender,
           senderEmail,
+          status: "sent", // ✅ explicitly set
         });
 
         await newMessage.save();
         console.log(`💾 Message saved from ${senderEmail} to room ${chatRoomId}`);
 
-        // Send to all clients in room
         io.to(chatRoomId).emit("receiveMessage", newMessage);
       } catch (err) {
         console.error("❌ Message saving failed:", err.message);
       }
     });
 
-    // Handle disconnection
+    // ✅ Handle message delivered update
+    socket.on("messageDelivered", async ({ messageId }) => {
+      try {
+        await Message.findByIdAndUpdate(messageId, { status: "delivered" });
+        console.log("📦 Message delivered:", messageId);
+      } catch (err) {
+        console.error("❌ Delivery status update failed:", err.message);
+      }
+    });
+
+    // ✅ Handle message seen update for all unseen messages in the room
+    socket.on("messageSeen", async ({ chatRoomId, userEmail }) => {
+      try {
+        const result = await Message.updateMany(
+          {
+            chatRoomId,
+            senderEmail: { $ne: userEmail }, // only mark messages not sent by self
+            status: { $ne: "seen" },
+          },
+          { $set: { status: "seen" } }
+        );
+        console.log(`👁️ Seen ${result.modifiedCount} messages in room ${chatRoomId}`);
+      } catch (err) {
+        console.error("❌ Seen status update failed:", err.message);
+      }
+    });
+
+    // Handle disconnect
     socket.on("disconnect", () => {
       console.log("🔴 Client disconnected:", socket.id);
     });

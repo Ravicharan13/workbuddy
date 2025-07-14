@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import ChatRoom from '../../ChatBox/ChatRoom';
-import {getUser} from '../../SignUp/auth';
+import { useNavigate } from "react-router-dom";
+
+
 
 export default function TrackRequestPage() {
   const [requests, setRequests] = useState([]);
   const [cancelId, setCancelId] = useState(null); // stores the request ID to cancel
-  const role = getUser();
+  const navigate = useNavigate();
+
+  
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -88,7 +91,7 @@ export default function TrackRequestPage() {
   };
 
   return (
-    <div className="w-[85%] h-full mx-auto p-6 md:px-20 md:py-16">
+    <div className="w-full h-full dark:bg-gray-900  p-6 md:px-36 md:py-16">
       <h1 className="text-3xl font-bold mb-4 text-gray-800 dark:text-white">Track Your Requests</h1>
 
       {requests.length === 0 ? (
@@ -96,7 +99,7 @@ export default function TrackRequestPage() {
       ) : (
         <div className="space-y-4">
           {requests.map((req) => (
-            <div key={req.id} className="border p-4 rounded-sm shadow-sm bg-white dark:bg-gray-800 flex flex-col gap-2">
+            <div key={req.id} className="border p-4 rounded-sm shadow-sm bg-white dark:bg-gray-900 dark:border-gray-800 flex flex-col gap-2">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:justify-between md:items-center">
                   <div>
@@ -145,9 +148,6 @@ export default function TrackRequestPage() {
                     <p><strong>Phone:</strong> {req.workerPhone}</p>
                   </div>
                 )}
-                {req.status === "accepted" && (
-                <ChatRoom chatRoomId={req.chatRoomId} user={role} />
-                 )}
 
                 {/* ✅ Rejection Reason */}
                 {req.status === 'rejected' && req.reason && (
@@ -174,12 +174,9 @@ export default function TrackRequestPage() {
                   )}
 
                   {/* Message Button for Accepted */}
-                  {req.status === 'accepted' && req.workerEmail && (
+                  {(req.status === 'accepted' || req.status === 'completed') && req.workerEmail && (
                     <button
-                      onClick={() => {
-                        toast.info(`Opening chat with ${req.workerName}`);
-                        // You can later navigate or open modal
-                      }}
+                       onClick={() => navigate(`/customer/chat/${req.chatRoomId}`)}
                       className="px-4 py-2 bg-gray-800 text-white rounded-sm hover:bg-gray-700 duration-300 text-sm"
                     >
                       Message

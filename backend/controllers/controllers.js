@@ -883,29 +883,43 @@ exports.getChart = async (req, res) => {
   }
 };
 
-// Example for worker
+
 exports.getChatMessages = async (req, res) => {
   try {
     const email = req.user.email;
     const role = req.user.role;
 
     const filter = role === "worker"
-  ? { workerEmail: email, workerStatus: { $in: ["accepted", "completed"] } }
-  : { customerEmail: email, workerStatus: { $in: ["accepted", "completed"] } };
+      ? { workerEmail: email, workerStatus: { $in: ["accepted", "completed"] } }
+      : { customerEmail: email, workerStatus: { $in: ["accepted", "completed"] } };
 
+    const requests = await Request.find(filter).sort({ requestSentAt: -1 });
 
-    const requests = await Request.find(filter);
+    const uniqueChatsMap = new Map();
 
-    const chats = requests.map((req) => ({
-      chatRoomId: req.chatRoomId,
-      name: role === "worker"
-        ? `${req.customerFirstName} ${req.customerLastName}`
-        : `${req.workerFirstName} ${req.workerLastName}`,
-      location: role === "worker" ? req.customerLocation : "RJY",
-      avatar: "https://i.pravatar.cc/150?u=" + req.chatRoomId,
-    }));
+    for (const req of requests) {
+      const key = role === "worker" ? req.customerEmail : req.workerEmail;
 
-    res.json(chats);
+      if (!uniqueChatsMap.has(key)) {
+        // Fetch last message in this chat room
+        const lastMsg = await Message.findOne({ chatRoomId: req.chatRoomId })
+          .sort({ createdAt: -1 })
+          .select("message createdAt");
+
+        uniqueChatsMap.set(key, {
+          chatRoomId: req.chatRoomId,
+          name: role === "worker"
+            ? `${req.customerFirstName} ${req.customerLastName}`
+            : `${req.workerFirstName} ${req.workerLastName}`,
+          location: role === "worker" ? req.customerLocation : req.workerLocation || "RJY",
+          avatar: "https://i.pravatar.cc/150?u=" + key,
+          lastMessage: lastMsg?.message || "",
+          lastMessageAt: lastMsg?.createdAt || null,
+        });
+      }
+    }
+
+    res.json(Array.from(uniqueChatsMap.values()));
   } catch (err) {
     console.error("❌ Chat Fetch Error:", err.message);
     res.status(500).json({ error: "Internal Server Error" });
@@ -916,79 +930,61 @@ exports.getChatMessages = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 exports.acceptRequest = async (req, res) => {
   try {
     const { requestId, workerStatus, workerReason } = req.body;
     const workerId = req.user.id;
-    console.log(workerStatus,workerReason)
 
-    console.log("🆔 Request ID:", requestId);
-    console.log("👷‍♂️ Worker ID:", workerId);
-    console.log("📌 Status to update:", workerStatus);
-
-    // Validate required fields
     if (!requestId || !workerStatus) {
       return res.status(400).json({ message: "Request ID and workerStatus are required" });
     }
 
-    // Reject case: workerReason is required
     if (workerStatus === "rejected" && !workerReason) {
       return res.status(400).json({ message: "workerReason is required when status is rejected" });
     }
 
-    // Find the worker
     const worker = await Worker.findById(workerId);
     if (!worker) {
       return res.status(404).json({ message: "Worker not found" });
     }
 
-    // Prepare update fields
+    const request = await Request.findById(requestId);
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
     const updateFields = {
       workerStatus,
       workerId: worker._id,
       workerEmail: worker.email,
-      workerName: `${worker.firstname} ${worker.lastname}`,
+      workerFirstName: worker.firstname,
+      workerLastName: worker.lastname,
     };
 
-    if (workerStatus === "accepted") {
-      updateFields.chatRoomId = uuidv4();
+    // ✅ Only if accepted, check for existing chatRoomId
+    if (workerStatus === "accepted" || workerStatus === "completed") {
+      const existingChat = await Request.findOne({
+        customerEmail: request.customerEmail,
+        workerEmail: worker.email,
+        chatRoomId: { $ne: null }
+      }).sort({ requestSentAt: -1 }); // latest request first
+
+      if (existingChat) {
+        updateFields.chatRoomId = existingChat.chatRoomId;
+      } else {
+        updateFields.chatRoomId = uuidv4(); // generate new
+      }
     }
 
     if (workerStatus === "rejected") {
       updateFields.rejectReason = workerReason;
     }
 
-    // Update the request
     const updatedRequest = await Request.findByIdAndUpdate(
       requestId,
       updateFields,
       { new: true }
     );
-
-    if (!updatedRequest) {
-      return res.status(404).json({ message: "Request not found" });
-    }
 
     res.status(200).json({
       message: `Request ${workerStatus} successfully`,

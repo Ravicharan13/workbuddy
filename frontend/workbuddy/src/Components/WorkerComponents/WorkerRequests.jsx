@@ -3,17 +3,16 @@ import dayjs from 'dayjs';
 import Footer from '../WorkerHomePage/Footer';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ChatRoom from '../ChatBox/ChatRoom';
-import {getUser} from "../SignUp/auth"
+import { useNavigate } from 'react-router-dom';
 
 
 export default function WorkerRequests() {
+  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [filter, setFilter] = useState('all');
   const [sortAsc, setSortAsc] = useState(false);
   const [rejectingId, setRejectingId] = useState(null);
   const [reasonInput, setReasonInput] = useState('');
-  const role = getUser();
 
   useEffect(() => {
   const fetchRequests = async () => {
@@ -140,11 +139,11 @@ export default function WorkerRequests() {
   console.log(sorted)
   const statusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-gray-800 dark:bg-gray-900';
-      case 'accepted': return 'bg-gray-800 dark:bg-gray-900';
-      case 'completed': return 'bg-gray-800 dark:bg-gray-900';
-      case 'rejected': return 'bg-gray-800 dark:bg-gray-900';
-      case 'cancelled': return 'bg-gray-800 dark:bg-gray-900';
+      case 'pending': return 'bg-gray-800 ';
+      case 'accepted': return 'bg-green-800 ';
+      case 'completed': return 'bg-blue-800 ';
+      case 'rejected': return 'bg-red-800 ';
+      case 'cancelled': return 'bg-red-800';
       default: return 'bg-gray-600';
     }
   };
@@ -183,7 +182,7 @@ export default function WorkerRequests() {
             <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
               <div className="space-y-2">
                 <h2 className="text-xl font-bold text-gray-800 uppercase dark:text-white">
-                  Service Wanted: <span className="text-gray-800 rounded-sm  dark:bg-gray-900 px-2 py-1">{req.work}</span>
+                  Service Wanted: <span className="text-gray-800 test rounded-sm  dark:text-gray-50 px-2 py-1">{req.work}</span>
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300 text-base">
                   <strong>Customer Name:</strong> <span className="text-gray-600 dark:text-gray-400">{req.name}</span>
@@ -203,10 +202,15 @@ export default function WorkerRequests() {
                 <p className="text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-sm bg-gray-100 p-1 text-center">
                   <strong>Time Slot:</strong> <span className="text-gray-700 dark:text-gray-300">{req.timeSlot}</span>
                 </p>
-                {req.status === "accepted" && (
-                  <ChatRoom chatRoomId={req.chatRoomId} user={role} />
-                )}
 
+                {(req.status === 'accepted' || req.status === 'completed') && (
+                    <button
+                       onClick={() => navigate(`/worker/chat/${req.chatRoomId}`)}
+                      className="px-4 py-2 bg-gray-800 dark:bg-gray-900 text-white rounded-sm hover:bg-gray-700 duration-300 text-sm"
+                    >
+                      Message
+                    </button>
+                  )}
 
                 {req.status==="cancelled" && (
                 <div>
@@ -245,7 +249,7 @@ export default function WorkerRequests() {
               <div className="mt-4">
                 <textarea
                   rows="2"
-                  className="w-full p-3 rounded-sm border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-800"
+                  className="w-full px-3 py-2 border-2 rounded-sm focus:outline-none focus:border-gray-400 dark:focus:border-gray-600 dark:bg-gray-900 border-gray-300 dark:border-gray-800 placeholder:text-sm placeholder:uppercase"
                   placeholder="Enter reason for rejection..."
                   value={reasonInput}
                   onChange={(e) => setReasonInput(e.target.value)}
@@ -253,7 +257,7 @@ export default function WorkerRequests() {
                 <div className="flex gap-3 mt-3">
                   <button
                     onClick={() => handleReasonSubmit(req.id)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-sm"
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-sm text-sm"
                   >
                     Submit Reason
                   </button>
@@ -262,7 +266,7 @@ export default function WorkerRequests() {
                       setRejectingId(null);
                       setReasonInput('');
                     }}
-                    className="border border-gray-500 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2 rounded-sm"
+                    className="border border-gray-500 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-2 rounded-sm text-sm"
                   >
                     Cancel
                   </button>

@@ -21,7 +21,7 @@ import Unauthorized from "./Components/SignUp/Unauthorized";
 import CustomerProfileUpdate from "./Components/CustomerProfileUpdate/index"
 import WorkerChatPage from "./Components/ChatBox/Pages/WorkerChatPage";
 import CustomerChatPage from "./Components/ChatBox/Pages/CustomerChatPage";
-
+// import ChatRedirector from "./Components/ChatBox/ChatRedirector";
 function App() {
   return (
     <UserProvider>
@@ -30,6 +30,7 @@ function App() {
         <div className="App">
           <Routes>
             <Route path="/unauthorized" element={<Unauthorized />} />
+            {/* <Route path="/chat/:chatRoomId" element={<ChatRedirector />} /> */}
             <Route
               path="/"
               element={
@@ -95,7 +96,7 @@ function App() {
               }
             />
             <Route
-              path="/worker/chat-page"
+              path="/worker/chat/:chatRoomId"
               element={
                 <ProtectedRoute role="worker">
                   <WorkerChatPage/>
@@ -135,7 +136,7 @@ function App() {
               }
             />
             <Route
-              path="/customer/chat-page"
+              path="/customer/chat/:chatRoomId"
               element={
                 <ProtectedRoute role="customer">
                   <CustomerChatPage/>

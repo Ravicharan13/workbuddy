@@ -27,7 +27,7 @@ const Navbar = () => {
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("username");
     setUser(null); // clear context
-    navigate("/");
+    navigate("/customerauth?mode=login");
   };
 
   const isLoggedIn = !!user;
@@ -68,7 +68,7 @@ const Navbar = () => {
                           Requests
                         </Link>
                         <Link
-                          to="/messages"
+                          to="/worker/chat/:chatRoomId"
                           className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
                         >
                           Messages
@@ -101,7 +101,7 @@ const Navbar = () => {
                           My Requests
                         </Link>
                         <Link
-                          to="/messages"
+                          to="/customer/chat/:chatRoomId"
                           className="text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500"
                         >
                           Messages
@@ -169,7 +169,7 @@ const Navbar = () => {
               </>
             )}
             {!isLoggedIn ? (
-                <Link to="/" className="text-green-600 hover:underline">Login</Link>
+                <Link to="/customerauth?mode=login" className="text-green-600 hover:underline">Login</Link>
               ) : null}
 
           </div>
