@@ -3,12 +3,13 @@ import { createContext, useContext, useState, useEffect } from "react";
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // user = { username, role }
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
-    if (storedUsername) {
-      setUser({ username: storedUsername });
+    const storedRole = localStorage.getItem("role");
+    if (storedUsername && storedRole) {
+      setUser({ username: storedUsername, role: storedRole });
     }
   }, []);
 

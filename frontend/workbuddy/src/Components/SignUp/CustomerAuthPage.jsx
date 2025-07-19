@@ -1,40 +1,52 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import worker from "../../Assests/worker.png"
+import worker from "../../Assests/worker.png";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useUser } from "../../context/UserContext";
 
 const CustomerAuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setUser } = useUser();
+
   const params = new URLSearchParams(location.search);
   const mode = params.get("mode");
 
-  const [isSignup, setIsSignup] = useState(mode === "login");
+  // Fix: isSignup should be true if mode === "signup"
+  const [isSignup, setIsSignup] = useState(mode === "signup");
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  // unify formData for both login and signup
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
     lastName: "",
     username: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   useEffect(() => {
-    setIsSignup(mode === "login");
+    setIsSignup(mode === "signup");
     setStep(1);
+    // clear form when mode changes
+    setFormData({
+      email: "",
+      firstName: "",
+      lastName: "",
+      username: "",
+      password: "",
+      confirmPassword: "",
+    });
+    setShowPassword(false);
   }, [mode]);
 
   const handleChange = (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -47,96 +59,100 @@ const CustomerAuthPage = () => {
   };
 
   const handleSignup = async () => {
-  const { email, firstName, lastName, username, password, confirmPassword } = formData;
+    const { email, firstName, lastName, username, password, confirmPassword } = formData;
 
-  if (!email || !firstName || !lastName || !username || !password || !confirmPassword) {
-    toast.error("Please fill in all fields.");
-    return;
-  }
+    if (!email || !firstName || !lastName || !username || !password || !confirmPassword) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
 
-  if (password !== confirmPassword) {
-    toast.error("Passwords do not match.");
-    return;
-  }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
 
-  const signupData = {
-    email,
-    firstname: firstName,
-    lastname: lastName,
-    username,
-    password,
+    const signupData = {
+      email,
+      firstname: firstName,
+      lastname: lastName,
+      username,
+      password,
+    };
+
+    try {
+      toast.loading("Registering...");
+      const response = await axios.post("http://localhost:5000/api/auth/customer/register", signupData);
+      toast.dismiss();
+      toast.success("Registration successful!");
+      setFormData({
+        email: "",
+        firstName: "",
+        lastName: "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+      });
+      setStep(1);
+      setIsSignup(false);
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error.response?.data?.message || "Registration failed");
+    }
   };
 
-  try {
-    toast.loading("Registering...");
-    const response = await axios.post("http://localhost:5000/api/auth/customer/register", signupData, {
-      headers: { "Content-Type": "application/json" },
-    });
-
-    toast.dismiss();
-    toast.success("Registration successful!");
-
-    setFormData({
-      email: "",
-      firstName: "",
-      lastName: "",
-      username: "",
-      password: "",
-      confirmPassword: ""
-    });
-    console.log(response)
-
-    setStep(1);
-    setIsSignup(false);
-  } catch (error) {
-    toast.dismiss();
-    toast.error(error.response?.data?.message || "Registration failed");
-  }
-};
-
-
   const handleLogin = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    const { email, password } = formData;
 
-  const loginData = { email, password };
+    if (!email || !password) {
+      toast.error("Please enter both email and password.");
+      return;
+    }
 
-  try {
-    toast.loading("Logging in...");
-    const response = await axios.post("http://localhost:5000/api/auth/customer/login", loginData, {
-      headers: { "Content-Type": "application/json" },
-    });
+    const loginData = { email, password };
 
-    toast.dismiss();
-    toast.success("Login successful!");
+    try {
+      toast.loading("Logging in...");
+      const response = await axios.post("http://localhost:5000/api/auth/customer/login", loginData);
+      toast.dismiss();
+      toast.success("Login successful!");
 
-    const data = response.data;
-    localStorage.setItem("accessToken", data.accessToken);
-    localStorage.setItem("refreshToken", data.refreshToken);
-    localStorage.setItem("username", data.username);
-    localStorage.setItem("email",data.email);
-    localStorage.setItem("role",data.role)
-    navigate("/customer/home")
-    // Optional: navigate to dashboard
-    // navigate("/customer/dashboard");
+      const data = response.data;
 
-  } catch (error) {
-    toast.dismiss();
-    toast.error(error.response?.data?.message || "Login failed");
-  }
-};
+      // Store tokens and user info in localStorage
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("email", data.email);
+      localStorage.setItem("role", data.role);
+
+      setUser({ username: data.username, role: data.role });
+
+      // Clear login form fields
+      setFormData((prev) => ({
+        ...prev,
+        email: "",
+        password: "",
+      }));
+
+      navigate("/customer/home");
+    } catch (error) {
+      toast.dismiss();
+      toast.error(error.response?.data?.message || "Login failed");
+    }
+  };
 
   return (
     <div className="min-h-screen md:min-h-0 md:h-[60vh] lg:h-[90vh] flex items-center justify-center bg-gray-100 p-4 dark:bg-gray-900">
       <div className="w-full h-[90%] max-w-6xl bg-white dark:bg-gray-800 dark:rounded-sm shadow-sm dark:shadow-slate-700 flex flex-col md:flex-row overflow-hidden">
-
         {/* Left - Worker Options */}
-        <div className="w-full md:w-2/3 bg-gray-800 dark:bg-gray-900 flex flex-col items-center justify-center p-8 space-y-1">
-          <img src={worker} alt="" className="w-24 h-24 bg-gray-300 rounded-sm" />
+        <div className="w-full md:w-1/3 bg-gray-800 dark:bg-gray-900 flex flex-col items-center justify-center p-8 space-y-1">
+          <img src={worker} alt="Worker" className="w-24 h-24 bg-gray-300 rounded-sm" />
           <h3 className="text-base font-semibold text-gray-200 uppercase">Worker</h3>
-           <br />
+          <br />
           <Link
             to="/workerauth?mode=login"
-           className="text-gray-50 hover:text-gray-500 py-0 rounded-sm duration-300 text-center text-base underline underline-offset-4 decoration-gray-500 font-normal"
+            className="text-gray-50 hover:text-gray-500 py-0 rounded-sm duration-300 text-center text-base underline underline-offset-4 decoration-gray-500 font-normal"
           >
             Login as Worker
           </Link>
@@ -150,22 +166,33 @@ const CustomerAuthPage = () => {
         </div>
 
         {/* Right - Form Section */}
-        <div className="w-full h-full md:w-2/3 px-10 py-6  bg-white dark:bg-gray-800">
+        <div className="w-full h-full md:w-2/3 px-10 py-6 bg-white dark:bg-gray-800">
           <div className="flex space-x-6 border-b dark:border-gray-500 mb-4">
             <button
-              className={`pb-2 font-semibold text-sm ${isSignup ? "border-b-2 border-gray-800 dark:text-white text-gray-800" : "text-gray-600 dark:text-gray-400"}`}
+              className={`pb-2 font-semibold text-sm ${
+                !isSignup
+                  ? "border-b-2 border-gray-800 dark:text-white text-gray-800"
+                  : "text-gray-600 dark:text-gray-400"
+              }`}
+              onClick={() => {
+                setIsSignup(false);
+                setStep(1);
+              }}
+            >
+              SIGN UP
+            </button>
+            <button
+              className={`pb-2 font-semibold text-sm ${
+                isSignup
+                  ? "border-b-2 border-gray-800 text-gray-800 dark:text-white"
+                  : "text-gray-600 dark:text-gray-400"
+              }`}
               onClick={() => {
                 setIsSignup(true);
                 setStep(1);
               }}
             >
               LOGIN
-            </button>
-            <button
-              className={`pb-2 font-semibold text-sm ${!isSignup ? "border-b-2 border-gray-800  text-gray-800 dark:text-white" : "text-gray-600 dark:text-gray-400"}`}
-              onClick={() => setIsSignup(false)}
-            >
-              SIGN UP
             </button>
           </div>
 
@@ -179,29 +206,33 @@ const CustomerAuthPage = () => {
 
               <form onSubmit={handleLogin} className="space-y-4 text-sm">
                 <div>
-                  <label htmlFor="email" className="block text-gray-600 mb-1 dark:text-gray-50 font-semibold">Email*</label>
+                  <label htmlFor="email" className="block text-gray-600 mb-1 dark:text-gray-50 font-semibold">
+                    Email*
+                  </label>
                   <input
                     id="email"
                     name="email"
                     type="email"
-                    value={email}
+                    value={formData.email}
                     placeholder="Enter your email"
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                    onChange={handleChange}
+                    className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
                     required
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-gray-600 mb-1 dark:text-gray-50 font-semibold">Password*</label>
+                  <label htmlFor="password" className="block text-gray-600 mb-1 dark:text-gray-50 font-semibold">
+                    Password*
+                  </label>
                   <input
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    value={password}
+                    value={formData.password}
                     placeholder="Enter your password"
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                    onChange={handleChange}
+                    className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
                     required
                   />
                 </div>
@@ -212,7 +243,7 @@ const CustomerAuthPage = () => {
                     type="checkbox"
                     checked={showPassword}
                     onChange={() => setShowPassword(!showPassword)}
-                    className="accent-blue-600 "
+                    className="accent-blue-600"
                   />
                   <label htmlFor="showPassword" className="text-gray-600 text-sm dark:text-gray-50">
                     Show Password
@@ -230,28 +261,26 @@ const CustomerAuthPage = () => {
 
                 <div>
                   <p className="text-center pb-1 dark:text-gray-50">
-                    Forgot{' '}
+                    Forgot{" "}
                     <Link to={"/customer/forgot-password"} className="text-gray-600 cursor-pointer underline">
                       Password?
                     </Link>
                   </p>
                   <p className="text-center dark:text-gray-50">
-                    Don't have an account?{' '}
-                    <span
-                      className="text-gray-600 cursor-pointer underline"
-                      onClick={() => setIsSignup(true)}
-                    >
+                    Don't have an account?{" "}
+                    <span className="text-gray-600 cursor-pointer underline" onClick={() => setIsSignup(false)}>
                       Register now
                     </span>
                   </p>
                 </div>
               </form>
             </>
-          ):
-          (
+          ) : (
             <>
               <h2 className="mb-4">
-                <span className="block text-xl uppercase font-bold text-gray-900 dark:text-gray-50">Customer Registration</span>
+                <span className="block text-xl uppercase font-bold text-gray-900 dark:text-gray-50">
+                  Customer Registration
+                </span>
                 <h2 className="text-base font-medium mt-1 dark:text-gray-50 text-gray-900">Get Started!</h2>
                 <span className="block text-sm text-gray-500 mt-1">
                   Create your account and enjoy personalized services.
@@ -266,7 +295,7 @@ const CustomerAuthPage = () => {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
                         type="email"
                         placeholder="Enter your email"
                       />
@@ -278,19 +307,19 @@ const CustomerAuthPage = () => {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
-                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-600 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
                         type="text"
                         placeholder="Enter your First name"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-gray-600 font-semibold dark:text-gray-50" >Last Name*</label>
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Last Name*</label>
                       <input
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
-                        className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
                         type="text"
                         placeholder="Enter your Last name"
                       />
@@ -309,87 +338,77 @@ const CustomerAuthPage = () => {
                 )}
 
                 {step === 2 && (
-                <>
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Username*</label>
-                    <input
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
-                      type="text"
-                      placeholder="Choose an username"
-                    />
-                  </div>
+                  <>
+                    <div>
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Username*</label>
+                      <input
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type="text"
+                        placeholder="Choose an username"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Password*</label>
-                    <input
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create your password"
-                    />
-                  </div>
+                    <div>
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Password*</label>
+                      <input
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create your password"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Confirm Password*</label>
-                    <input
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Repeat your password"
-                    />
-                  </div>
+                    <div>
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Confirm Password*</label>
+                      <input
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Repeat your password"
+                      />
+                    </div>
 
-                  <div className="flex items-center space-x-2 dark:text-gray-50 pt-2">
-                    <input
-                      id="showPasswordSignup"
-                      type="checkbox"
-                      checked={showPassword}
-                      onChange={() => setShowPassword(!showPassword)}
-                      className="accent-blue-600"
-                    />
-                    <label htmlFor="showPasswordSignup" className="text-gray-600 text-sm dark:text-gray-50">
-                      Show Password
-                    </label>
-                  </div>
+                    <div className="flex items-center space-x-2 dark:text-gray-50 pt-2">
+                      <input
+                        id="showPasswordSignup"
+                        type="checkbox"
+                        checked={showPassword}
+                        onChange={() => setShowPassword(!showPassword)}
+                        className="accent-blue-600"
+                      />
+                      <label htmlFor="showPasswordSignup" className="text-gray-600 text-sm dark:text-gray-50">
+                        Show Password
+                      </label>
+                    </div>
 
-                  <div className="flex justify-between pt-4">
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className="w-[28%] bg-gray-400 duration-300 dark:bg-gray-700 dark:hover:bg-gray-400 text-white py-1 rounded-sm hover:bg-gray-400"
-                    >
-                      Previous
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleSignup}
-                      className="w-[48%] bg-gray-700 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
-                    >
-                      Sign Up
-                    </button>
-                  </div>
-
-                  <p className="text-center pt-3 dark:text-gray-50">
-                    Already have an account?{' '}
-                    <span className="text-gray-600 cursor-pointer" onClick={() => setIsSignup(false)}>
-                      Login now
-                    </span>
-                  </p>
-                </>
-              )}
-
+                    <div className="flex justify-between py-3 dark:text-gray-50">
+                      <button
+                        type="button"
+                        className="w-[28%] bg-gray-700 duration-300 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
+                        onClick={() => setStep(1)}
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="button"
+                        className="w-[58%] bg-gray-700 duration-300 dark:bg-gray-900 dark:hover:bg-gray-700 text-white py-2 rounded-sm hover:bg-gray-800"
+                        onClick={handleSignup}
+                      >
+                        Register
+                      </button>
+                    </div>
+                  </>
+                )}
               </form>
             </>
-          ) 
-        }
+          )}
         </div>
       </div>
     </div>
