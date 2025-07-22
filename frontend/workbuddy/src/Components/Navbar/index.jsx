@@ -104,7 +104,6 @@ const Navbar = ({ isDark, setIsDark }) => {
           
         </div>
 
-        {/* Mobile Menu */}
         {menuOpen && (
           <div className="lg:hidden md:px-10 absolute top-16 left-0 w-full bg-white dark:bg-gray-900 shadow-md z-50 text-base font-medium px-4 py-4 space-y-3">
             <div className='flex gap-1'><House className='w-5 text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500 ' /><Link onClick={closeMenu} to={currentRole === "worker" ? "/worker/home" : "/customer/home"} className="block text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-500">Home</Link></div>
