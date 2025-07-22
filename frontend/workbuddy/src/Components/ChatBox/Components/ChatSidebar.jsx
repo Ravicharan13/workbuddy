@@ -1,19 +1,62 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState, useRef } from "react";
+import axiosInstance from "../../../axiosInstance";
 import { format, isToday, isYesterday } from "date-fns";
+import { io } from "socket.io-client";
 
 export default function ChatSidebar({ onSelectChat, userRole }) {
   const [conversations, setConversations] = useState([]);
+  const socketRef = useRef(null);
+
+  const fetchChats = async () => {
+    try {
+      const res = await axiosInstance.get("/auth/chats");
+      setConversations(res.data);
+    } catch (err) {
+      console.error("Failed to fetch chats", err);
+    }
+  };
 
   useEffect(() => {
-    const fetchChats = async () => {
-      const token = localStorage.getItem("accessToken");
-      const res = await axios.get("http://localhost:5000/api/auth/chats", {
-        headers: { Authorization: `Bearer ${token}` },
+    fetchChats(); // initial fetch
+
+    // Initialize socket only once
+    socketRef.current = io("http://localhost:5000", {
+      transports: ["websocket"],
+    });
+
+    const socket = socketRef.current;
+
+    // ✅ Listener for new messages
+    socket.on("receiveMessage", (newMessage) => {
+      setConversations((prev) => {
+        const updated = prev.map((chat) => {
+          if (chat.chatRoomId === newMessage.chatRoomId) {
+            return {
+              ...chat,
+              lastMessage: newMessage.message,
+              lastMessageAt: newMessage.createdAt,
+            };
+          }
+          return chat;
+        });
+
+        // ⚠️ If chat is not found, refetch all
+        const exists = updated.find(
+          (c) => c.chatRoomId === newMessage.chatRoomId
+        );
+        if (!exists) {
+          fetchChats(); // fallback
+        }
+
+        return updated;
       });
-      setConversations(res.data);
+    });
+    socket.on("chatListNeedsRefresh", fetchChats);
+
+
+    return () => {
+      socket.disconnect();
     };
-    fetchChats();
   }, []);
 
   const formatLastMessageTime = (time) => {
@@ -25,7 +68,7 @@ export default function ChatSidebar({ onSelectChat, userRole }) {
   };
 
   return (
-    <div className="w-full md:w-[300px] bg-white dark:text-gray-50 dark:bg-gray-900 border dark:border-gray-800 overflow-y-auto">
+    <div className="w-full h-full md:w-[350px] bg-white dark:text-gray-50 dark:bg-gray-900 border dark:border-gray-800 overflow-y-auto">
       <div className="p-4 font-semibold text-lg">Chats</div>
       {conversations.map((chat) => (
         <div
@@ -43,10 +86,10 @@ export default function ChatSidebar({ onSelectChat, userRole }) {
               <div className="font-medium">{chat.name}</div>
               <div className="text-sm text-gray-500 truncate">
                 {chat.lastMessage
-                ? chat.lastMessage.length > 20
-                  ? chat.lastMessage.slice(0, 20) + "..."
-                  : chat.lastMessage
-                : "No messages yet"}
+                  ? chat.lastMessage.length > 20
+                    ? chat.lastMessage.slice(0, 20) + "..."
+                    : chat.lastMessage
+                  : "No messages yet"}
               </div>
             </div>
             <div className="text-xs text-gray-400">

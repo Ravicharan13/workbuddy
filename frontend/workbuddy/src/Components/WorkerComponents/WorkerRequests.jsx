@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import Footer from '../WorkerHomePage/Footer';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from "../../axiosInstance"
 
 
 export default function WorkerRequests() {
@@ -13,117 +13,100 @@ export default function WorkerRequests() {
   const [sortAsc, setSortAsc] = useState(false);
   const [rejectingId, setRejectingId] = useState(null);
   const [reasonInput, setReasonInput] = useState('');
+  const [loading, setLoading] =useState(false);
 
   useEffect(() => {
   const fetchRequests = async () => {
+    setLoading(true)
     try {
-      const token = localStorage.getItem("accessToken");
-      const res = await fetch('http://localhost:5000/api/auth/getallwork', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      console.log(data)
+      const res = await axiosInstance.get("/auth/getallwork");
+      const data = res.data;
+
+      console.log(data);
+
       const formatted = data.data.map((item) => ({
-        id: item._id, // use MongoDB _id
+        id: item._id,
+        avatar: item.customerAvatar,
         name: `${item.customerFirstName} ${item.customerLastName}`,
         email: item.customerEmail,
         phone: item.customerPhoneNumber,
         location: item.customerLocation,
         work: item.serviceWanted,
         getDate: item.timestamp,
-        scheduleDate:item.scheduleDate,
+        sort:item.requestSentAt,
+        scheduleDate: item.scheduleDate,
         timeSlot: item.timeSlot,
         status: item.workerStatus,
         reason: item.rejectReason,
-        chatRoomId: item.chatRoomId
+        chatRoomId: item.chatRoomId,
       }));
 
       setRequests(formatted);
     } catch (error) {
-      toast.error('Failed to fetch', {
-        toastId: 'fetch-error',
-        position: 'top-right',
-        className: 'bg-gray-800 text-white uppercase font-semibold',
-        bodyClassName: 'text-sm',
-        progressClassName: 'bg-gray-800',
+      console.error("Fetch error:", error);
+      toast.error("Failed to fetch requests", {
+        toastId: "fetch-error",
+        position: "top-right",
+        className: "bg-gray-800 text-white uppercase font-semibold",
+        bodyClassName: "text-sm",
+        progressClassName: "bg-gray-800",
       });
-
-
-
+    }finally {
+      setLoading(false); // ✅ Always stop loading
     }
   };
+
   fetchRequests();
 }, []);
 
 
-  const handleAccept = async (id) => {
+ const handleAccept = async (id) => {
   try {
-    const token = localStorage.getItem("accessToken");
-    const res = await fetch('http://localhost:5000/api/auth/accept', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
+    const res = await axiosInstance.put("/auth/accept", {
         requestId: id,
-        workerStatus: 'accepted'
-      })
-    });
+        workerStatus: "accepted",
+      });
 
-    const result = await res.json();
-    if (res.ok) {
-      setRequests(prev =>
-        prev.map(r => r.id === id ? { ...r, status: 'accepted', reason: '' } : r)
-      );
-    } else {
-      toast.error(result.message || 'Failed to accept request.');
-
-    }
+      if (res.data.success) {
+        toast.success("Request accepted successfully!");
+        setRequests(prev =>
+          prev.map(r => r.id === id ? { ...r, status: 'accepted', reason: '' } : r)
+        );
+      } else {
+        toast.error(res.data.message || 'Failed to accept request.');
+      }
   } catch (error) {
     toast.error('Error while accepting request.');
 
   }
 };
 
-
   const handleRejectClick = (id) => setRejectingId(id);
 
   const handleReasonSubmit = async (id) => {
   if (!reasonInput.trim()) return;
+
   try {
-    const token = localStorage.getItem("accessToken");
-    const res = await fetch('http://localhost:5000/api/auth/accept', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        requestId: id,
-        workerStatus: 'rejected',
-        workerReason: reasonInput
-      })
+    const res = await axiosInstance.put("/auth/accept", {
+      requestId: id,
+      workerStatus: 'rejected',
+      workerReason: reasonInput
     });
 
-    const result = await res.json();
-    if (res.ok) {
+    if (res.data.success) {
+      toast.success("Request rejected successfully!");
       setRequests(prev =>
-        prev.map(r => r.id === id ? { ...r, status: 'rejected', reason: reasonInput } : r)
+        prev.map(r =>
+          r.id === id ? { ...r, status: 'rejected', reason: reasonInput } : r
+        )
       );
       setRejectingId(null);
       setReasonInput('');
     } else {
-      toast.error(result.message || 'Failed to reject request.');
-
+      toast.error(res.data.message || 'Failed to reject request.');
     }
   } catch (error) {
-    toast.error('Error while rejecting request.');
-
+    toast.error(error.response?.data?.message || 'Error while rejecting request.');
   }
 };
   const filtered = requests.filter(r =>
@@ -131,47 +114,63 @@ export default function WorkerRequests() {
   );
 
   const sorted = [...filtered].sort((a, b) => {
-  const da = new Date(a.scheduleDate);
-  const db = new Date(b.scheduleDate);
+  const da = new Date(a.sort);
+  const db = new Date(b.sort);
   return sortAsc ? da - db : db - da;
 });
 
   console.log(sorted)
   const statusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-gray-800 ';
-      case 'accepted': return 'bg-green-800 ';
-      case 'completed': return 'bg-blue-800 ';
-      case 'rejected': return 'bg-red-800 ';
-      case 'cancelled': return 'bg-red-800';
-      default: return 'bg-gray-600';
+      case 'pending': return ' text-gray-800';
+      case 'accepted': return 'text-green-900 ';
+      case 'completed': return ' text-green-900';
+      case 'rejected': return ' text-red-900';
+      case 'cancelled': return 'text-gray-700';
+      default: return 'text-gray-800';
     }
   };
 
   return (
     <>
+    {loading && <div className="flex items-center justify-center h-screen text-gray-600 dark:text-gray-300 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 dark:border-white"></div>
+        <span className="ml-3">Loading...</span>
+      </div>}
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 dark:text-gray-50 text-gray-900 px-8 py-14 md:px-20 lg:px-44">
         <h1 className="text-3xl font-bold mb-8 text-center">Customer Requests</h1>
 
-        <div className="flex flex-wrap justify-between mb-6 gap-4">
-          <div className="flex gap-4">
-            {['all', 'pending', 'accepted', 'completed', 'cancelled', 'rejected'].map(f => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-2 py-1 md:px-4 md:py-2 rounded-sm ${filter === f ? 'bg-gray-800 text-white dark:bg-gray-800 dark:text-gray-50' : 'bg-white dark:bg-gray-50 dark:text-gray-900'}`}
-              >
-                {f.charAt(0).toUpperCase() + f.slice(1)}
-              </button>
-            ))}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+          {/* Filter Buttons - scrollable on mobile */}
+          <div className="w-full overflow-x-auto">
+            <div className="flex gap-2 w-max sm:w-full">
+              {['all', 'pending', 'accepted', 'completed', 'cancelled', 'rejected'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`whitespace-nowrap text-sm px-3 py-1 md:px-4 md:py-2 rounded-sm transition-colors duration-200 ${
+                    filter === f
+                      ? 'bg-gray-800 text-white dark:bg-gray-800 dark:text-gray-50'
+                      : 'bg-white text-gray-800 dark:bg-gray-50 dark:text-gray-900'
+                  }`}
+                >
+                  {f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
-          <button
-            onClick={() => setSortAsc(!sortAsc)}
-            className="px-2 py-1 md:px-4 md:py-2 bg-white dark:bg-gray-800 dark:text-gray-50 rounded-sm"
-          >
-            Sort by {sortAsc ? 'Oldest' : 'Newest'}
-          </button>
+
+          {/* Sort Button */}
+          <div className="w-full md:w-36">
+            <button
+              onClick={() => setSortAsc(!sortAsc)}
+              className="w-full md:w-auto px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-50 rounded-sm border dark:border-gray-700"
+            >
+              Sort by {sortAsc ? 'Oldest' : 'Newest'}
+            </button>
+          </div>
         </div>
+
 
         <div className="space-y-6">
           {sorted.map(req => (
@@ -180,33 +179,42 @@ export default function WorkerRequests() {
             className="bg-white dark:bg-gray-800 border-gray-500 dark:border-gray-700 rounded-sm p-6 mb-6"
           >
             <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <h2 className="text-xl font-bold text-gray-800 uppercase dark:text-white">
                   Service Wanted: <span className="text-gray-800 test rounded-sm  dark:text-gray-50 px-2 py-1">{req.work}</span>
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 text-base">
+                <div className='flex gap-5'>
+                  <img
+                    src={req.avatar || 'https://via.placeholder.com/48'}
+                    alt={`${req.name}`}
+                    className="w-16 h-16 rounded-sm mt-1"
+                  />
+                <div>
+                  <p className="text-gray-700 dark:text-gray-300 text-base">
                   <strong>Customer Name:</strong> <span className="text-gray-600 dark:text-gray-400">{req.name}</span>
                 </p>
-                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                <p className="text-gray-700 dark:text-gray-300 text-sm pt-1">
                   <strong>Email:</strong> <span className="text-gray-600 dark:text-gray-400">{req.email}</span>
                 </p>
-                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                <p className="text-gray-700 dark:text-gray-300 text-sm pt-1">
                   <strong>Phone:</strong> <span className="text-gray-600 dark:text-gray-400">{req.phone}</span>
                 </p>
-                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                <p className="text-gray-700 dark:text-gray-300 text-sm pt-1">
                   <strong>Location:</strong> <span className="text-gray-600 dark:text-gray-400">{req.location}</span>
                 </p>
-                <p className="text-gray-800 dark:bg-gray-900  dark:text-gray-300 text-sm bg-gray-200 p-1 text-center">
+                </div>
+                
+                </div>
+                <p className="text-gray-800 dark:bg-gray-900  dark:text-gray-300 text-sm bg-gray-200 p-1 text-center mt-10">
                     <strong>Schedule Date:</strong> <span className="text-gray-700 dark:text-gray-300">{dayjs(req.scheduleDate).format('dddd, MMMM D, YYYY')}</span>
                 </p>
-                <p className="text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-sm bg-gray-100 p-1 text-center">
+                <p className="text-gray-800 dark:bg-gray-700 dark:text-gray-300 text-sm bg-gray-100 p-1 text-center mt-3">
                   <strong>Time Slot:</strong> <span className="text-gray-700 dark:text-gray-300">{req.timeSlot}</span>
                 </p>
-
                 {(req.status === 'accepted' || req.status === 'completed') && (
                     <button
                        onClick={() => navigate(`/worker/chat/${req.chatRoomId}`)}
-                      className="px-4 py-2 bg-gray-800 dark:bg-gray-900 text-white rounded-sm hover:bg-gray-700 duration-300 text-sm"
+                      className="px-4 py-2 bg-gray-800 dark:bg-gray-900 text-white rounded-sm hover:bg-gray-700 duration-300 text-sm mt-10"
                     >
                       Message
                     </button>
@@ -221,9 +229,9 @@ export default function WorkerRequests() {
               
               <div className="flex flex-col items-end gap-4">
                 <span
-                  className={`text-xs text-white font-semibold px-3 py-2 rounded-sm ${statusColor(req.status)} shadow-sm`}
+                  className={`text-sm text-gray-900 dark:text-gray-100 font-semibold px-3 py-2`}
                 >
-                  Status: {req.status.charAt(0).toUpperCase() + req.status.slice(1)}
+                  Status: <span className={`${statusColor(req.status)} uppercase font-bold`}>{req.status.charAt(0).toUpperCase() + req.status.slice(1)}</span>
                 </span>
 
                 {req.status === 'pending' && (

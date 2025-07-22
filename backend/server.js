@@ -7,6 +7,9 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes")
 const http = require('http');
 const socketIO = require('socket.io');
+const cookieParser = require("cookie-parser");
+
+
 
 // Config
 dotenv.config();
@@ -16,8 +19,9 @@ const app = express();
 app.use(express.json());
 app.use(cors({
   origin: 'http://localhost:3000',
-  credentials: true
+  credentials: true,
 }));
+app.use(cookieParser());
 
 // Create HTTP server
 const server = http.createServer(app);

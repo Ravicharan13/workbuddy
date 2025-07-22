@@ -1,14 +1,19 @@
-export const getRole = () => {
-  return localStorage.getItem("role");
-};
+import { useUser } from "../../context/UserContext";
 
-export const isWorker = () => getRole() === "worker";
-export const isCustomer = () => getRole() === "customer";
+export const useRole = () => {
+  const { user } = useUser();
 
-export const getUser = () => {
+  const role = user?.role;
+
   return {
-    email: localStorage.getItem("email"),
-    role: localStorage.getItem("role"),
+    role,
+    isWorker: role === "worker",
+    isCustomer: role === "customer",
+    email: user?.email,
+    username: user?.username,
+    isLogin: user?.isLogin,
+    profileUpdateStatus: user?.profileUpdateStatus
   };
 };
+
 

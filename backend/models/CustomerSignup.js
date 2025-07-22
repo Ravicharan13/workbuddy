@@ -10,7 +10,10 @@ const customerSchema = new mongoose.Schema({
   resetCodeExpires: { type: Date },
    resetCodeVerified : {type: Boolean},
   phone: { type: String },           
-  location: { type: String },     
+  location: { type: String },   
+  city: { type: String },  
+  state: { type: String },  
+  profileUpdateStatus: {type: Boolean,default:false},
   role: {
   type: String,
   default: "customer",
@@ -20,7 +23,7 @@ dob: { type: Date },
 
   gender: {
     type: String,
-    enum: ['male', 'female'],
+    enum: ['Male', 'Female', 'Other'],
     required: false
   },
   avatar: {

@@ -1,10 +1,10 @@
 import React from "react";
 import ChatRoom from "../ChatRoom";
-import { getUser } from "../../SignUp/auth";
+import { useRole } from "../../SignUp/auth";
 import { ArrowLeft } from "lucide-react";
 
 export default function ChatWindow({ chatRoom, userRole, onBack }) {
-  const user = getUser();
+  const user = useRole();
 
   return (
     <div className="h-full flex flex-col">

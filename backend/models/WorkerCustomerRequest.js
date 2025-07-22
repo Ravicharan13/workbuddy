@@ -1,6 +1,17 @@
 const mongoose = require("mongoose");
 
 const workerRequestSchema = new mongoose.Schema({
+  customerAvatar: {
+    type: String,
+    default: function () {
+      // `this` refers to the document being created
+      if (this.gender === 'female') {
+        return 'https://res.cloudinary.com/dquha58yu/image/upload/v1751697562/female_m1dwf1.png';
+      } else {
+        return 'https://res.cloudinary.com/dquha58yu/image/upload/v1751697248/307ce493-b254-4b2d-8ba4-d12c080d6651_pty54f.jpg';
+      }
+    }
+  },
   customerEmail: {
     type: String,
     required: true,
@@ -40,6 +51,21 @@ const workerRequestSchema = new mongoose.Schema({
   workerFirstName: { type: String, required:true },
   workerLastName: { type: String, required:true },
   workerId: { type: mongoose.Schema.Types.ObjectId, ref: "Worker", default: null },
+  workerLocation: {
+    type: String,
+    required: true,
+  },
+  workerAvatar: {
+    type: String,
+    default: function () {
+      // `this` refers to the document being created
+      if (this.gender === 'female') {
+        return 'https://res.cloudinary.com/dquha58yu/image/upload/v1751697562/female_m1dwf1.png';
+      } else {
+        return 'https://res.cloudinary.com/dquha58yu/image/upload/v1751697248/307ce493-b254-4b2d-8ba4-d12c080d6651_pty54f.jpg';
+      }
+    }
+  },
   rejectReason: { type: String, default:null },
   chatRoomId: {
     type: String, 

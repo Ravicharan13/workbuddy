@@ -2,7 +2,7 @@ const Message = require("./models/Message");
 
 module.exports = (io) => {
   const userSockets = {}; // Maps email to socket.id
-  const typingTimers = {}; // Helps throttle typing status
+  const typingTimers = {}; // Helps throttle typing indicators
 
   io.on("connection", (socket) => {
     console.log("🟢 New client connected:", socket.id);
@@ -14,11 +14,13 @@ module.exports = (io) => {
       console.log(`👤 ${email} joined room ${chatRoomId}`);
     });
 
-    // Handle typing
+    // Typing event
     socket.on("typing", ({ chatRoomId, userEmail }) => {
       socket.to(chatRoomId).emit("typing", { userEmail });
 
-      if (typingTimers[userEmail]) clearTimeout(typingTimers[userEmail]);
+      if (typingTimers[userEmail]) {
+        clearTimeout(typingTimers[userEmail]);
+      }
 
       typingTimers[userEmail] = setTimeout(() => {
         socket.to(chatRoomId).emit("stopTyping");
@@ -26,7 +28,7 @@ module.exports = (io) => {
       }, 2000);
     });
 
-    // Handle message send
+    // Send message
     socket.on("sendMessage", async (data) => {
       try {
         const { chatRoomId, message, sender, senderEmail } = data;
@@ -41,39 +43,44 @@ module.exports = (io) => {
           message: message.trim(),
           sender,
           senderEmail,
-          status: "sent", // ✅ explicitly set
+          status: "sent",
         });
 
         await newMessage.save();
         console.log(`💾 Message saved from ${senderEmail} to room ${chatRoomId}`);
 
+        // Emit the full saved message to all participants in the room
         io.to(chatRoomId).emit("receiveMessage", newMessage);
+        io.emit("chatListNeedsRefresh");
+
+
       } catch (err) {
         console.error("❌ Message saving failed:", err.message);
       }
     });
 
-    // ✅ Handle message delivered update
+    // Message delivered
     socket.on("messageDelivered", async ({ messageId }) => {
       try {
         await Message.findByIdAndUpdate(messageId, { status: "delivered" });
-        console.log("📦 Message delivered:", messageId);
+        console.log("📦 Message marked as delivered:", messageId);
       } catch (err) {
         console.error("❌ Delivery status update failed:", err.message);
       }
     });
 
-    // ✅ Handle message seen update for all unseen messages in the room
+    // Message seen
     socket.on("messageSeen", async ({ chatRoomId, userEmail }) => {
       try {
         const result = await Message.updateMany(
           {
             chatRoomId,
-            senderEmail: { $ne: userEmail }, // only mark messages not sent by self
+            senderEmail: { $ne: userEmail }, // only messages from other users
             status: { $ne: "seen" },
           },
           { $set: { status: "seen" } }
         );
+
         console.log(`👁️ Seen ${result.modifiedCount} messages in room ${chatRoomId}`);
       } catch (err) {
         console.error("❌ Seen status update failed:", err.message);

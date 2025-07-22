@@ -1,8 +1,10 @@
 import React,{useState,useEffect} from 'react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 import { X,Moon, Sun, Lock, Unlock } from 'lucide-react';
 import Footer from "../WorkerHomePage/Footer"
+import axiosInstance from "../../axiosInstance"
+import { State, City } from 'country-state-city';
+import Select from "react-select";
 
 const avatarList = [
   'https://res.cloudinary.com/dquha58yu/image/upload/v1751696352/img7_jht5fj.jpg',
@@ -15,13 +17,14 @@ const avatarList = [
   'https://res.cloudinary.com/dquha58yu/image/upload/v1751696350/img4_tpdpek.jpg'
 ];
 
-const ProfilePage = () => {
+const ProfilePage = ({ isDark, setIsDark }) => {
 
     const [image, setImage] = useState('');
     const [showAvatars, setShowAvatars] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [serviceInput, setServiceInput] = useState('');
     const [services, setServices] = useState([]);
+    
 
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -40,6 +43,20 @@ const predefinedServices = [
 ];
 
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+
+  const states = State.getStatesOfCountry("IN").map((s) => ({
+    label: s.name,
+    value: s.isoCode
+  }));
+
+  const cities = selectedState
+    ? City.getCitiesOfState("IN", selectedState.value).map((c) => ({
+        label: c.name,
+        value: c.name
+      }))
+    : [];
  
 
 
@@ -71,134 +88,220 @@ const handleInputChange = (e) => {
     phone: '',
     location: '',
     description: '',
+    gender:'',
   });
 
   
-    const handleImageSelect = async (imgUrl) => {
-    try {
-      setImage(imgUrl);
-      const token = localStorage.getItem('accessToken');
-      const res = await axios.patch('http://localhost:5000/api/auth/worker/update-avatar', {
-        avatar: imgUrl,
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setProfile(prev => ({ ...prev, avatar: imgUrl }));
-      toast.success("Avatar updated!");
-      setShowAvatars(false);
-    } catch (err) {
-      toast.error("Failed to update avatar");
-      console.error(err);
-    }
-  };
+  const handleImageSelect = async (imgUrl) => {
+  try {
+    setImage(imgUrl);
+
+    const res = await axiosInstance.patch('/auth/worker/update-avatar', {
+      avatar: imgUrl,
+    });
+
+    setProfile(prev => ({ ...prev, avatar: imgUrl }));
+    toast.success("Avatar updated!");
+    setShowAvatars(false);
+  } catch (err) {
+    toast.error("Failed to update avatar");
+    console.error(err);
+  }
+};
+
 
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [isDark, setIsDark] = useState(false);
   const [isPrivate, setIsPrivate] = useState(true);
 
   useEffect(() => {
-    const fetchWorkerProfile = async () => {
-      try {
-        const token = localStorage.getItem('accessToken');
-        const res = await axios.get('http://localhost:5000/api/auth/worker/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const { firstname, lastname, dob, phone, location, description , services} = res.data;
-        setInfo({ firstname, lastname, dob, phone, location, description });
-        console.log(services)
-        if (Array.isArray(res.data.services)) {
-        setServices(res.data.services);
+  const fetchWorkerProfile = async () => {
+    try {
+      const res = await axiosInstance.get('/auth/worker/profile');
+
+      const { firstname, lastname, dob, phone, location, description, services, gender, state, city, profileUpdateStatus } = res.data;
+      setInfo({ firstname, lastname, dob, phone, location, description, gender });
+      const matchedState = states.find((s) => s.label === state || s.value === state);
+            setSelectedState(matchedState || null);
+      
+            // After setting selectedState, get matching cities
+            const cityList = matchedState
+              ? City.getCitiesOfState("IN", matchedState.value).map((c) => ({
+                  label: c.name,
+                  value: c.name
+                }))
+              : [];
+      
+            const matchedCity = cityList.find((c) => c.label === city || c.value === city);
+            setSelectedCity(matchedCity || null);
+
+      if (Array.isArray(services)) {
+        setServices(services);
       } else {
         setServices([]);
       }
-        setProfile(res.data);
-        console.log(res.data)
-      } catch (err) {
-        console.error(err);
-        toast.error('Failed to load profile. Please try again.');
-      } finally {
-        setLoading(false);
+
+      setProfile(res.data);
+      console.log(res.data);
+      if(!profileUpdateStatus){
+        toast.warn("Please Update Your Profile, Then only show your profile to others!")
       }
-    };
-
-    fetchWorkerProfile();
-  }, []);
-
-   const handleChange = (e) => {
-    setInfo({ ...info, [e.target.name]: e.target.value });
-  };
-
-  const handleSave = async () => {
-    try {
-      const token = localStorage.getItem('accessToken');
-      await axios.patch('http://localhost:5000/api/auth/worker/update-info', info, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      toast.success("Profile updated!");
-      setIsEditing(false);
     } catch (err) {
       console.error(err);
-      toast.error("Update failed");
+      toast.error('Failed to load profile. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
-  const formatDate = (isoDate) => {
-  if (!isoDate) return '';
-  return new Date(isoDate).toISOString().split('T')[0];
+
+  fetchWorkerProfile();
+}, []);
+
+
+  const handleChange = (e, type) => {
+  if (type === 'state') {
+    setSelectedState(e);
+    setSelectedCity(null);
+  } else if (type === 'city') {
+    setSelectedCity(e);
+  } else {
+    const { name, value } = e.target;
+    setInfo((prev) => ({ ...prev, [name]: value }));
+  }
 };
 
-  const handleAddService = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!serviceInput.trim()) return;
+  const handleSave = async () => {
+  try {
+    await axiosInstance.patch('/auth/worker/update-info', {
+      ...info,
+      state: selectedState?.value || '',
+      city: selectedCity?.value || ''
+    });
+    toast.success("Profile updated!");
+    setIsEditing(false);
+  } catch (err) {
+    console.error(err);
+    toast.error("Update failed");
+  }
+};
 
-    try {
-      const res = await axios.post(
-        'http://localhost:5000/api/auth/worker/services',
-        { name: serviceInput },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setServices((prev) => [...prev, res.data]);
-      setServiceInput('');
-      toast.success("Service added!");
-    } catch (err) {
-      toast.error("Failed to add service");
-      console.error(err);
-    }
-  };
+ const formatDate = (isoDate) => {
+  if (!isoDate) return '';
+  const date = new Date(isoDate);
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  return `${day}-${month}-${year}`;
+};
+const formatDateForInput = (isoDate) => {
+  if (!isoDate) return '';
+  const date = new Date(isoDate);
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`; // required by input[type="date"]
+};
+
+const genderOptions = [
+  { value: '', label: 'Select gender' },
+  { value: 'Male', label: 'Male' },
+  { value: 'Female', label: 'Female' },
+  { value: 'Other', label: 'Other' },
+];
+
+const customSelectStyles = (isDark, isEditing) => ({
+  control: (base, state) => ({
+    ...base,
+    backgroundColor: isEditing
+      ? isDark ? '#111827' : '#ffffff'   // dark:bg-gray-900 / bg-white
+      : isDark ? '#374151' : '#f3f4f6', // dark:bg-gray-700 / bg-gray-100
+
+    color: isDark ? '#F3F4F6' : '#1F2937', // text
+    borderColor: state.isFocused
+      ? isDark ? '#9CA3AF' : '#E5E7EB'   // focus:border
+      : isDark ? '#4B5563' : '',  // default border
+
+    boxShadow: 'none',
+    borderWidth: '2px',
+    borderRadius: '0.125rem', // Tailwind rounded-sm
+    fontSize: '0.875rem',      // text-sm
+    minHeight: '2.25rem',      // h-9
+    padding: '0px',
+    '&:hover': {
+      borderColor: isDark ? '#9CA3AF' : '#E5E7EB',
+    },
+  }),
+
+  menu: (base) => ({
+    ...base,
+    backgroundColor: isDark ? '#1F2937' : '#ffffff', // dark:bg-gray-800
+    borderRadius: '0.25rem',
+    marginTop: 2,
+    zIndex: 20,
+  }),
+
+  option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isSelected
+      ? isDark ? '#4B5563' : '#E5E7EB'
+      : state.isFocused
+        ? isDark ? '#374151' : '#F3F4F6'
+        : 'transparent',
+    color: isDark ? '#F9FAFB' : '#1F2937',
+    fontSize: '0.875rem',
+    padding: '0.5rem 0.75rem',
+    cursor: 'pointer',
+  }),
+
+  singleValue: (base) => ({
+    ...base,
+    color: isDark ? '#F9FAFB' : '#1F2937',
+  }),
+
+  input: (base) => ({
+    ...base,
+    color: isDark ? '#F9FAFB' : '#1F2937',
+    
+  }),
+});
+
+
+
+  const handleAddService = async () => {
+  if (!serviceInput.trim()) return;
+
+  try {
+    const res = await axiosInstance.post('/auth/worker/services', {
+      name: serviceInput
+    });
+    setServices((prev) => [...prev, res.data]);
+    setServiceInput('');
+    toast.success("Service added!");
+  } catch (err) {
+    toast.error("Failed to add service");
+    console.error(err);
+  }
+};
+
 
   const handleDeleteService = async (serviceId) => {
   try {
-    const token = localStorage.getItem('accessToken');
-    const res = await axios.delete(`http://localhost:5000/api/auth/worker/services/${serviceId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    console.log(res)
+    const res = await axiosInstance.delete(`/auth/worker/services/${serviceId}`);
+    console.log(res);
     setServices((prev) => prev.filter(service => service._id !== serviceId));
     toast.success("Service deleted successfully");
-    // Update UI after successful deletion
   } catch (error) {
     console.error("Delete service failed:", error);
     toast.error("Failed to delete service");
   }
 };
 
+
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-  // Apply dark mode class to <html> tag
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle('dark');
-  };
+ 
 
 
   const [formData, setFormData] = useState({
@@ -213,39 +316,34 @@ const handleInputChange = (e) => {
   };
 
   const handleSubmit = async () => {
-    if (formData.newPassword !== formData.confirmPassword) {
-      toast.error("New and confirm passwords do not match");
-      return;
-    }
+  if (formData.newPassword !== formData.confirmPassword) {
+    toast.error("New and confirm passwords do not match");
+    return;
+  }
 
-    try {
-      const token = localStorage.getItem("accessToken");
-      await axios.patch(
-        'http://localhost:5000/api/auth/worker/change-password',
-        {
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+  try {
+    await axiosInstance.patch('/auth/worker/change-password', {
+      currentPassword: formData.currentPassword,
+      newPassword: formData.newPassword,
+    });
 
-      toast.success("Password changed successfully");
-      setShowPasswordModal(false);
-      setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Failed to change password");
-    }
-  };
+    toast.success("Password changed successfully");
+    setShowPasswordModal(false);
+    setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.message || "Failed to change password");
+  }
+};
 
 
 
 
-  if (loading) return <div>Loading profile...</div>;
+
+  if (loading) return <div className="flex items-center justify-center h-screen text-gray-600 dark:text-gray-300 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800 dark:border-white"></div>
+        <span className="ml-3">Loading...</span>
+      </div>
 
 
 
@@ -303,11 +401,16 @@ const handleInputChange = (e) => {
           {profile && (
             <>
               <p className="text-2xl font-bold pb-2">{profile.firstname + " " + profile.lastname}</p>
-              <p className="text-base font-medium text-gray-500">{profile.username}</p>
-              <p className="text-sm text-gray-500">{!profile.phone?"Phone number not mention.":`+91 ${profile.phone}`}</p>
-              <p className="text-sm text-gray-500">{!profile.dob? "DOB not mention":formatDate(profile.dob)}</p>
-              <p className="text-sm text-gray-500">{profile.email}</p>
-              <p className="text-sm  text-gray-500">{!profile.location? "Location not mention" :profile.location}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300">{profile.username}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300">{!profile.phone?"Phone number not mention.":`+91 ${profile.phone}`}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300">{!profile.dob? "DOB not mention":formatDate(profile.dob)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300">{profile.email}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300">{!profile.location? "Location not mention" :profile.location}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-300">
+                    {profile.city && profile.state
+                      ? `${profile.city}, ${profile.state}`
+                      : "City and State not mentioned"}
+                  </p>
             </>
           )}
 
@@ -329,7 +432,7 @@ const handleInputChange = (e) => {
                   value={info.firstname}
                   onChange={handleChange}
                   placeholder="First Name"
-                  className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-100 dark:border-gray-700   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
+                  className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-200 border-gray-200 dark:border-gray-600   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
                   disabled={!isEditing}
                 />
               </div>
@@ -343,7 +446,7 @@ const handleInputChange = (e) => {
                   value={info.lastname}
                   onChange={handleChange}
                   placeholder="Last Name"
-                 className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-100 dark:border-gray-700   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
+                 className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-200 dark:border-gray-600   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
                   disabled={!isEditing}
                 />
               </div>
@@ -355,9 +458,9 @@ const handleInputChange = (e) => {
                   id="dob"
                   name="dob"
                   type="date"
-                  value={formatDate(info.dob)}
+                  value={formatDateForInput(info.dob)}
                   onChange={handleChange}
-                  className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-100 dark:border-gray-700   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
+                  className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-200 dark:border-gray-600   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
                   disabled={!isEditing}
                 />
               </div>
@@ -371,21 +474,66 @@ const handleInputChange = (e) => {
                   value={info.phone}
                   onChange={handleChange}
                   placeholder="Phone Number"
-                 className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-100 dark:border-gray-700   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
+                 className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-200 dark:border-gray-600   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
                   disabled={!isEditing}
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm mb-1 font-semibold dark:text-gray-400"
+                  htmlFor="gender"
+                >
+                  Gender
+                </label>
+                <Select
+                  id="gender"
+                  options={genderOptions}
+                  value={genderOptions.find(option => option.value === info.gender)}
+                  onChange={(selectedOption) =>
+                    setInfo({ ...info, gender: selectedOption?.value || '' })
+                  }
+                  isDisabled={!isEditing}
+                  styles={customSelectStyles(isDark, isEditing)} // ← uses your shared style function
+                  className="text-sm"
+                  menuPlacement="auto"
+                />
+              </div>
+
+              <div >
+                <label className="block text-sm mb-1 font-semibold dark:text-gray-400" htmlFor="state">Select State:</label>
+                <Select
+                  options={states}
+                  value={selectedState}
+                  onChange={(e) => handleChange(e, 'state')}
+                  isDisabled={!isEditing}
+                  styles={customSelectStyles(isDark, isEditing)}
+                  className="w-full"
+                />
+              </div>
+
+              <div >
+               <label className="block text-sm mb-1 font-semibold dark:text-gray-400" htmlFor="city">Select City:</label> 
+              <Select
+                options={cities}
+                value={selectedCity}
+                onChange={(e) => handleChange(e, 'city')}
+                isDisabled={!selectedState || !isEditing}
+               styles={customSelectStyles(isDark, isEditing)}
+              className="w-full"
                 />
               </div>
 
               {/* Location (Textarea) */}
               <div className="md:col-span-2">
-                <label className="block text-sm mb-1 font-semibold dark:text-gray-400" htmlFor="location">Location</label>
+                <label className="block text-sm mb-1 font-semibold dark:text-gray-400" htmlFor="location">Address</label>
                 <textarea
                   id="location"
                   name="location"
                   value={info.location}
                   onChange={handleChange}
                   placeholder="Enter your address"
-                  className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-100 dark:border-gray-700   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
+                  className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-200 dark:border-gray-600   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
                   disabled={!isEditing}
                 />
               </div>
@@ -398,7 +546,7 @@ const handleInputChange = (e) => {
                   value={info.description}
                   onChange={handleChange}
                   placeholder="Write something about yourself..."
-                  className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-100 dark:border-gray-700   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
+                  className={`p-2 rounded-sm text-sm w-full border-2 dark:text-gray-100 border-gray-200 dark:border-gray-600   dark:focus:border-gray-400 focus:outline-none focus:border-gray-200 ${!isEditing?'bg-gray-100 text-gray-600 dark:bg-gray-700': 'bg-white dark:bg-gray-900'}`}
                   disabled={!isEditing}
                 />
               </div>
@@ -562,7 +710,7 @@ const handleInputChange = (e) => {
                       <input
                         type="checkbox"
                         checked={isDark}
-                        onChange={toggleTheme}
+                        onChange={() => setIsDark(!isDark)}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:bg-gray-800 transition-colors duration-300" />

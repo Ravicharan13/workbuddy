@@ -21,10 +21,16 @@ export default function ChatRoom({ chatRoomId, user }) {
 
   // Scroll to latest message
   useEffect(() => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 50);
-  }, [messages]);
+  const el = messagesEndRef.current;
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth" });
+  }
+}, [messages]);
+useEffect(() => {
+  console.log("🔄 Messages updated:", messages);
+}, [messages]);
+
+
 
   // Group messages by date
   const groupMessagesByDate = (messages) => {
@@ -62,7 +68,7 @@ export default function ChatRoom({ chatRoomId, user }) {
   };
 
   return (
-    <div className="flex flex-col h-full border rounded-sm  p-4 bg-gray-50 dark:bg-gray-900 dark:border-gray-800">
+    <div className="flex flex-col h-full w-full border rounded-sm  p-4 bg-gray-50 dark:bg-gray-900 dark:border-gray-800">
       <div className="overflow-y-auto scroll-smooth mb-4 space-y-4 pr-2">
         {Object.entries(groupedMessages).map(([dateLabel, msgs]) => (
           <div key={dateLabel}>

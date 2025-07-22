@@ -38,8 +38,15 @@ const {
   getAllByCust,
   customerCancelRequest,
   getChart,
-  getChatMessages
+  getChatMessages,
+  refreshAccessToken,
+  getMe,
+  logout,
+  getRequireInfoCust,
+  getRequireInfo
 } = require("../controllers/controllers");
+
+router.get("/get-require-info",auth,getRequireInfo)
 
 // Worker routes
 router.post("/worker/register", register);   
@@ -85,6 +92,10 @@ router.get("/getall",getAll)
 router.put("/accept",auth,role("worker"), acceptRequest)
 router.get("/message/:chatRoomId",auth,getChart)
 router.get("/chats",auth,getChatMessages)
+
+router.post("/refresh",refreshAccessToken)
+router.get("/me",auth,getMe)
+router.post('/logout', logout);
 
 module.exports = router;
 

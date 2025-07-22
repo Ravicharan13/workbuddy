@@ -5,6 +5,7 @@ import customer from "../../Assests/customer.png"
 import { useUser } from "../../context/UserContext"
 import axios from "axios";
 import { toast } from "react-toastify";
+import axiosInstance from "../../axiosInstance";
 
 
 const WorkerAuthPage = () => {
@@ -14,7 +15,7 @@ const WorkerAuthPage = () => {
   const mode = params.get("mode");
   const { setUser } = useUser();
 
-  const [isSignup, setIsSignup] = useState(mode === "login");
+  const [isSignup, setIsSignup] = useState(mode !== "signup");
 
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
@@ -28,49 +29,65 @@ const WorkerAuthPage = () => {
     password: "",
     confirmPassword: ""
   });
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState([]);
+  
 
   // const username= localStorage.getItem("username")
  
+  const validatePassword = (pwd) => {
+  const errors = [];
+
+  if (pwd.length < 8) errors.push("At least 8 characters");
+  if (!/[A-Z]/.test(pwd)) errors.push("One uppercase letter (A-Z)");
+  if (!/[a-z]/.test(pwd)) errors.push("One lowercase letter (a-z)");
+  if (!/[0-9]/.test(pwd)) errors.push("One number (0-9)");
+  if (!/[@$!%*?#&]/.test(pwd)) errors.push("One special character (@$!%*?#&)");
+
+  return errors;
+};
 
 
   // Example: handle login logic
   const handleLogin = async (e) => {
   e.preventDefault();
-
-  const loginData = {
-    email,
-    password,
-  };
+  const loginData = { email, password };
 
   try {
     toast.loading("Logging in...");
-    const response = await axios.post("http://localhost:5000/api/auth/login", loginData, {
+
+    await axios.post("http://localhost:5000/api/auth/login", loginData, {
       headers: {
         "Content-Type": "application/json",
       },
+      withCredentials: true, // 🛡️ important for cookies (access/refresh tokens)
     });
 
-  
-    
+    toast.dismiss();
+    toast.success("Welcome Back!");
+
+
+    const response = await axiosInstance.get("/auth/get-require-info", {
+      withCredentials: true,
+    });
+
+
     const data = response.data;
+    data.isLogin = true;
+    setUser(data)
 
-    toast.dismiss(); // remove loading
-    toast.success("Welcome Back!",data.username);
+    if(data.profileUpdateStatus) {
+      navigate("/worker/home");
+    } else {
+      navigate("/worker/profile-update");
+    }
 
-    // Save token in localStorage (optional)
-    localStorage.setItem("accessToken", data.accessToken);
-    localStorage.setItem("refreshToken", data.refreshToken);
-    localStorage.setItem("username", data.username);
-    localStorage.setItem("email",data.email)
-    localStorage.setItem("role",data.role)
-    setUser({ username: data.username });
-
-    navigate("/worker/home")
   } catch (error) {
     toast.dismiss();
     toast.error(error.response?.data?.message || "Login failed");
   }
 };
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -85,8 +102,11 @@ const WorkerAuthPage = () => {
   };
 
   const handleSignup = async () => {
-   
   const { email, firstName, lastName, username, password, confirmPassword } = formData;
+  if (validatePassword(password).length > 0) {
+    toast.error("Password does not meet requirements.");
+    return;
+  }
 
   if (!email || !firstName || !lastName || !username || !password || !confirmPassword) {
     toast.error("Please fill in all fields.");
@@ -108,26 +128,17 @@ const WorkerAuthPage = () => {
 
   try {
     toast.loading("Registering...");
-    const response = await axios.post("http://localhost:5000/api/auth/worker/register", signupData, {
+
+    await axios.post("http://localhost:5000/api/auth/worker/register", signupData, {
       headers: { "Content-Type": "application/json" },
+      withCredentials: true, // 👈 this is optional here (only needed if backend sets cookies on register)
     });
 
     toast.dismiss();
     toast.success("Registration successful!");
-    console.log(response)
-
-    // Reset form and switch to login mode
-    setFormData({
-      email: "",
-      firstName: "",
-      lastName: "",
-      username: "",
-      password: "",
-      confirmPassword: ""
-    });
-
+    setFormData({ email: "", firstName: "", lastName: "", username: "", password: "", confirmPassword: "" });
     setStep(1);
-    setIsSignup(false);
+    setIsSignup(true);
   } catch (error) {
     toast.dismiss();
     toast.error(error.response?.data?.message || "Registration failed");
@@ -135,8 +146,9 @@ const WorkerAuthPage = () => {
 };
 
 
+
   useEffect(() => {
-    setIsSignup(mode === "login");
+    setIsSignup(mode !== "signup");
   }, [mode]);
   
 
@@ -144,17 +156,14 @@ const WorkerAuthPage = () => {
     <div className="min-h-screen md:min-h-0 md:h-[60vh] lg:h-[90vh] flex items-center justify-center bg-gray-100 p-4 dark:bg-gray-900">
       <div className="w-full h-[90%] max-w-6xl bg- dark:bg-gray-800 rounded-sm dark:shadow-sm dark:shadow-slate-700 flex flex-col md:flex-row overflow-hidden">
         {/* Left Form */}
-        <div className="w-full h-full md:w-2/3 px-10 py-6 bg-white dark:bg-gray-800">
+        <div className="w-full h-full md:w-2/3 lg:w-[1000px] px-10 py-6 bg-white dark:bg-gray-800">
          
           <div className="flex space-x-6 border-b dark:border-gray-500 mb-4">
             <button
               className={`pb-2 font-semibold text-sm ${
                 isSignup ? "border-b-2 border-gray-800 text-gray-800 dark:text-white" : "text-gray-600 dark:text-gray-400"
               }`}
-              onClick={() => {
-                setIsSignup(true);
-                setStep(1);
-              }}
+              onClick={() => navigate("?mode=login")}
             >
               LOGIN
             </button>
@@ -162,7 +171,7 @@ const WorkerAuthPage = () => {
               className={`pb-2 font-semibold text-sm ${
                 !isSignup ? "border-b-2 border-gray-800 text-gray-800 dark:text-white" : "text-gray-600 dark:text-gray-400"
               }`}
-              onClick={() => setIsSignup(false)}
+              onClick={() => navigate("?mode=signup")}
             >
               SIGN UP
             </button>
@@ -323,16 +332,48 @@ const WorkerAuthPage = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Password*</label>
-                    <input
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 border-gray-100 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create your password"
-                    />
+                  <div className="relative flex items-start">
+                    <div className="w-full">
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Password*</label>
+                      <input
+                        name="password"
+                        value={formData.password}
+                        onFocus={() => setPasswordFocused(true)}
+                        onBlur={() => setTimeout(() => setPasswordFocused(false), 100)}
+                        onChange={(e) => {
+                          const newPwd = e.target.value;
+                          setFormData((prev) => ({ ...prev, password: newPwd }));
+                          const errors = validatePassword(newPwd);
+                          setPasswordErrors(errors);
+                        }}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create your password"
+                      />
+                    </div>
+
+                    {/* Floating card to the right */}
+                    {passwordFocused && formData.password && passwordErrors.length > 0 && (
+                      <div className="absolute top-14 left-0 md:top-14 md:left-0 lg:top-12 lg:right-56 ml-4 w-64 z-20 bg-white dark:bg-gray-900 shadow-lg rounded-sm border border-gray-200 dark:border-gray-700 p-3 text-xs text-gray-700 dark:text-gray-200">
+                        <p className="font-semibold mb-2 text-sm text-gray-800 dark:text-white">Password must contain:</p>
+                        <ul className="space-y-1">
+                          {[
+                            { label: "At least 8 characters", valid: formData.password.length >= 8 },
+                            { label: "One uppercase letter (A-Z)", valid: /[A-Z]/.test(formData.password) },
+                            { label: "One lowercase letter (a-z)", valid: /[a-z]/.test(formData.password) },
+                            { label: "One number (0-9)", valid: /[0-9]/.test(formData.password) },
+                            { label: "One special character (@$!%*?#&)", valid: /[@$!%*?#&]/.test(formData.password) },
+                          ]
+                            .filter((item) => !item.valid)
+                            .map((item, idx) => (
+                              <li key={idx} className="flex items-center gap-2 text-gray-500">
+                                <span className="text-xl rounded-full bg-gray-500"></span>
+                                {item.label}
+                              </li>
+                            ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -364,7 +405,7 @@ const WorkerAuthPage = () => {
                     <button
                       type="button"
                       onClick={() => setStep(1)}
-                      className="w-[28%] bg-gray-400 duration-300 dark:bg-gray-700 dark:hover:bg-gray-400 text-white py-1 rounded-sm hover:bg-gray-400"
+                      className="w-[28%] bg-gray-500 duration-300 dark:bg-gray-700 dark:hover:bg-gray-400 text-white py-1 rounded-sm hover:bg-gray-400"
                     >
                       Previous
                     </button>

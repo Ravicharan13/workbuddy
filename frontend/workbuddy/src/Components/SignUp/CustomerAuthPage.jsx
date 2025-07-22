@@ -4,18 +4,25 @@ import { useNavigate } from "react-router-dom";
 import worker from "../../Assests/worker.png"
 import axios from "axios";
 import { toast } from "react-toastify";
+import {useUser} from "../../context/UserContext"
+import axiosInstance from "../../axiosInstance";
 
 const CustomerAuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const mode = params.get("mode");
+  const [passwordErrors, setPasswordErrors] = useState([]);
+  const { setUser } = useUser();
 
-  const [isSignup, setIsSignup] = useState(mode === "login");
+
+  const [isSignup, setIsSignup] = useState(mode !== "signup");
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+
 
   const [formData, setFormData] = useState({
     email: "",
@@ -26,8 +33,21 @@ const CustomerAuthPage = () => {
     confirmPassword: ""
   });
 
+  const validatePassword = (pwd) => {
+  const errors = [];
+
+  if (pwd.length < 8) errors.push("At least 8 characters");
+  if (!/[A-Z]/.test(pwd)) errors.push("One uppercase letter (A-Z)");
+  if (!/[a-z]/.test(pwd)) errors.push("One lowercase letter (a-z)");
+  if (!/[0-9]/.test(pwd)) errors.push("One number (0-9)");
+  if (!/[@$!%*?#&]/.test(pwd)) errors.push("One special character (@$!%*?#&)");
+
+  return errors;
+};
+
+
   useEffect(() => {
-    setIsSignup(mode === "login");
+    setIsSignup(mode !== "signup");
     setStep(1);
   }, [mode]);
 
@@ -46,8 +66,14 @@ const CustomerAuthPage = () => {
     }
   };
 
-  const handleSignup = async () => {
+const handleSignup = async () => {
+
   const { email, firstName, lastName, username, password, confirmPassword } = formData;
+
+   if (validatePassword(password).length > 0) {
+  toast.error("Password does not meet requirements.");
+  return;
+}
 
   if (!email || !firstName || !lastName || !username || !password || !confirmPassword) {
     toast.error("Please fill in all fields.");
@@ -71,6 +97,7 @@ const CustomerAuthPage = () => {
     toast.loading("Registering...");
     const response = await axios.post("http://localhost:5000/api/auth/customer/register", signupData, {
       headers: { "Content-Type": "application/json" },
+      withCredentials: true, // if backend sets httpOnly cookies
     });
 
     toast.dismiss();
@@ -82,55 +109,59 @@ const CustomerAuthPage = () => {
       lastName: "",
       username: "",
       password: "",
-      confirmPassword: ""
+      confirmPassword: "",
     });
-    console.log(response)
 
     setStep(1);
-    setIsSignup(false);
+    setIsSignup(true);
   } catch (error) {
     toast.dismiss();
     toast.error(error.response?.data?.message || "Registration failed");
   }
 };
 
-
-  const handleLogin = async (e) => {
+const handleLogin = async (e) => {
   e.preventDefault();
 
   const loginData = { email, password };
 
   try {
     toast.loading("Logging in...");
-    const response = await axios.post("http://localhost:5000/api/auth/customer/login", loginData, {
+    await axios.post("http://localhost:5000/api/auth/customer/login", loginData, {
       headers: { "Content-Type": "application/json" },
+      withCredentials: true, // important if backend sets cookies
     });
 
     toast.dismiss();
     toast.success("Login successful!");
 
+    const response = await axiosInstance.get("/auth/get-require-info", {
+      withCredentials: true,
+    });
     const data = response.data;
-    localStorage.setItem("accessToken", data.accessToken);
-    localStorage.setItem("refreshToken", data.refreshToken);
-    localStorage.setItem("username", data.username);
-    localStorage.setItem("email",data.email);
-    localStorage.setItem("role",data.role)
-    navigate("/customer/home")
-    // Optional: navigate to dashboard
-    // navigate("/customer/dashboard");
+    data.isLogin = true;
+    setUser(data)
 
+    if(data.profileUpdateStatus) {
+      navigate("/customer/home");
+    } else {
+      navigate("/customer/profile-update");
+    }
+ 
+    
   } catch (error) {
     toast.dismiss();
     toast.error(error.response?.data?.message || "Login failed");
   }
 };
 
+
   return (
     <div className="min-h-screen md:min-h-0 md:h-[60vh] lg:h-[90vh] flex items-center justify-center bg-gray-100 p-4 dark:bg-gray-900">
       <div className="w-full h-[90%] max-w-6xl bg-white dark:bg-gray-800 dark:rounded-sm shadow-sm dark:shadow-slate-700 flex flex-col md:flex-row overflow-hidden">
 
         {/* Left - Worker Options */}
-        <div className="w-full md:w-2/3 bg-gray-800 dark:bg-gray-900 flex flex-col items-center justify-center p-8 space-y-1">
+        <div className="w-full md:w-2/3  bg-gray-800 dark:bg-gray-900 flex flex-col items-center justify-center p-8 space-y-1">
           <img src={worker} alt="" className="w-24 h-24 bg-gray-300 rounded-sm" />
           <h3 className="text-base font-semibold text-gray-200 uppercase">Worker</h3>
            <br />
@@ -150,20 +181,19 @@ const CustomerAuthPage = () => {
         </div>
 
         {/* Right - Form Section */}
-        <div className="w-full h-full md:w-2/3 px-10 py-6  bg-white dark:bg-gray-800">
+        <div className="w-full h-full md:w-2/3 lg:w-[1000px] px-10 py-6  bg-white dark:bg-gray-800">
           <div className="flex space-x-6 border-b dark:border-gray-500 mb-4">
             <button
               className={`pb-2 font-semibold text-sm ${isSignup ? "border-b-2 border-gray-800 dark:text-white text-gray-800" : "text-gray-600 dark:text-gray-400"}`}
-              onClick={() => {
-                setIsSignup(true);
-                setStep(1);
-              }}
+              onClick={() => navigate("?mode=login")}
+
             >
               LOGIN
             </button>
             <button
               className={`pb-2 font-semibold text-sm ${!isSignup ? "border-b-2 border-gray-800  text-gray-800 dark:text-white" : "text-gray-600 dark:text-gray-400"}`}
-              onClick={() => setIsSignup(false)}
+              onClick={() => navigate("?mode=signup")}
+
             >
               SIGN UP
             </button>
@@ -322,17 +352,50 @@ const CustomerAuthPage = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-gray-600 font-semibold dark:text-gray-50">Password*</label>
-                    <input
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700  dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create your password"
-                    />
+                  <div className="relative flex items-start">
+                    <div className="w-full">
+                      <label className="block text-gray-600 font-semibold dark:text-gray-50">Password*</label>
+                      <input
+                        name="password"
+                        value={formData.password}
+                        onFocus={() => setPasswordFocused(true)}
+                        onBlur={() => setTimeout(() => setPasswordFocused(false), 100)}
+                        onChange={(e) => {
+                          const newPwd = e.target.value;
+                          setFormData((prev) => ({ ...prev, password: newPwd }));
+                          const errors = validatePassword(newPwd);
+                          setPasswordErrors(errors);
+                        }}
+                        className="w-full border-0 border-b-2 dark:text-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:focus:border-gray-500 border-gray-100 focus:outline-none focus:border-gray-600 px-1 py-2 placeholder:text-sm placeholder:uppercase"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create your password"
+                      />
+                    </div>
+
+                    {/* Floating card to the right */}
+                    {passwordFocused && formData.password && passwordErrors.length > 0 && (
+                      <div className="absolute top-14 left-0 md:top-14 md:left-0 lg:top-12 lg:right-56 ml-4 w-64 z-20 bg-white dark:bg-gray-900 shadow-lg rounded-sm border border-gray-200 dark:border-gray-700 p-3 text-xs text-gray-700 dark:text-gray-200">
+                        <p className="font-semibold mb-2 text-sm text-gray-800 dark:text-white">Password must contain:</p>
+                        <ul className="space-y-1">
+                          {[
+                            { label: "At least 8 characters", valid: formData.password.length >= 8 },
+                            { label: "One uppercase letter (A-Z)", valid: /[A-Z]/.test(formData.password) },
+                            { label: "One lowercase letter (a-z)", valid: /[a-z]/.test(formData.password) },
+                            { label: "One number (0-9)", valid: /[0-9]/.test(formData.password) },
+                            { label: "One special character (@$!%*?#&)", valid: /[@$!%*?#&]/.test(formData.password) },
+                          ]
+                            .filter((item) => !item.valid)
+                            .map((item, idx) => (
+                              <li key={idx} className="flex items-center gap-2 text-gray-500">
+                                <span className="text-xl rounded-full bg-gray-500"></span>
+                                {item.label}
+                              </li>
+                            ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
+
 
                   <div>
                     <label className="block text-gray-600 font-semibold dark:text-gray-50">Confirm Password*</label>
@@ -363,7 +426,7 @@ const CustomerAuthPage = () => {
                     <button
                       type="button"
                       onClick={() => setStep(1)}
-                      className="w-[28%] bg-gray-400 duration-300 dark:bg-gray-700 dark:hover:bg-gray-400 text-white py-1 rounded-sm hover:bg-gray-400"
+                      className="w-[28%] bg-gray-500 duration-300 dark:bg-gray-700 dark:hover:bg-gray-400 text-white py-1 rounded-sm hover:bg-gray-400"
                     >
                       Previous
                     </button>

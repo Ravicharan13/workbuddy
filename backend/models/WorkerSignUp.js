@@ -9,6 +9,8 @@ const serviceSchema = new mongoose.Schema({
 });
 
 
+
+
 const workerSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   firstname:    { type: String, required: true },
@@ -20,10 +22,13 @@ const workerSchema = new mongoose.Schema({
   resetCodeExpires: { type: Date },
   resetCodeVerified : {type: Boolean},
   dob: { type: Date },
+   city: { type: String },  
+  state: { type: String },  
+  profileUpdateStatus : {type: String},
 
   gender: {
     type: String,
-    enum: ['male', 'female'],
+    enum: ['Male', 'Female','Other'],
     required: false
   },
   avatar: {
@@ -50,6 +55,11 @@ const workerSchema = new mongoose.Schema({
   default: "worker",
   enum: ["worker"],
 },
+workerAvailability: {
+    type: String,
+    enum: ["available", "unavailable"],
+    default: "available",
+  },
 
 
 }, {

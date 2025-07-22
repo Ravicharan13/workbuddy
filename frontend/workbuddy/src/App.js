@@ -1,4 +1,5 @@
 // export default App;
+import { useState,useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./Components/Navbar";
 // import SignUp from "./Components/SignUp";
@@ -23,10 +24,25 @@ import WorkerChatPage from "./Components/ChatBox/Pages/WorkerChatPage";
 import CustomerChatPage from "./Components/ChatBox/Pages/CustomerChatPage";
 // import ChatRedirector from "./Components/ChatBox/ChatRedirector";
 function App() {
+  const [isDark, setIsDark] = useState(() => {
+    // load from localStorage (optional)
+    return localStorage.getItem('theme') === 'dark';
+  });
+
+  // apply theme class to <html>
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
   return (
     <UserProvider>
       <Router>
-        <Navbar />
+        <Navbar isDark={isDark} setIsDark={setIsDark} />
         <div className="App">
           <Routes>
             <Route path="/unauthorized" element={<Unauthorized />} />
@@ -91,7 +107,7 @@ function App() {
               path="/worker/profile-update"
               element={
                 <ProtectedRoute role="worker">
-                  <WorkerProfileUpdate />
+                  <WorkerProfileUpdate  isDark={isDark} setIsDark={setIsDark}/>
                 </ProtectedRoute>
               }
             />
@@ -131,7 +147,7 @@ function App() {
               path="/customer/profile-update"
               element={
                 <ProtectedRoute role="customer">
-                  <CustomerProfileUpdate/>
+                  <CustomerProfileUpdate isDark={isDark} setIsDark={setIsDark}/>
                 </ProtectedRoute>
               }
             />

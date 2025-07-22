@@ -1,5 +1,5 @@
 const Worker = require("../models/WorkerSignUp");
-const Customer = require("../models/CustomerSignUp");
+const Customer = require("../models/CustomerSignup");
 const RefreshToken = require("../models/RefreshToken");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -7,7 +7,8 @@ const nodemailer = require("nodemailer");
 const Request = require("../models/WorkerCustomerRequest")
 const { v4: uuidv4 } = require("uuid");
 const Message = require("../models/Message")
-const mongoose = require('mongoose');
+const updateWorkerAvailability = require("../utils/updateWorkerAvailability")
+const { sendRegistrationEmail, sendCustomerWelcomeEmail } = require("../utils/mailer");
 
 // Generate Access Token
 const generateAccessToken = (user, role) => {
@@ -36,6 +37,95 @@ const generateRefreshToken = async (user) => {
   return token;
 };
 
+// controllers/authController.js
+
+exports.getMe = async (req, res) => {
+  try {
+    // Ensure req.user exists (added by auth middleware)
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    res.status(200).json({
+      isAuthenticated: true,
+      id: req.user.id,
+      email: req.user.email,
+      role: req.user.role,
+      username: req.user.username
+    });
+  } catch (error) {
+    console.error("Error in getMe:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+exports.refreshAccessToken = async (req, res) => {
+  try {
+    const oldRefreshToken = req.cookies.refreshToken;
+
+    if (!oldRefreshToken) {
+      return res.status(401).json({ message: "Refresh token not found" });
+    }
+
+    // Check if token exists in DB
+    const tokenDoc = await RefreshToken.findOne({ token: oldRefreshToken });
+    if (!tokenDoc) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
+    // Verify the refresh token
+    const decoded = jwt.verify(oldRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const userId = decoded.id;
+
+    // Try to find the user in Customer first, then Worker
+    let user = await Customer.findById(userId);
+    let role = "customer";
+
+    if (!user) {
+      user = await Worker.findById(userId);
+      role = "worker";
+    }
+
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    console.log("user:",user)
+
+    // ✅ Generate new access and refresh tokens
+    const newAccessToken = generateAccessToken(user, role);
+    const newRefreshToken = await generateRefreshToken(user, role);
+
+    console.log("atokens:",newAccessToken)
+    console.log("rtoken:",newRefreshToken)
+
+    // Replace old refresh token in DB
+    await RefreshToken.deleteOne({ token: oldRefreshToken });
+
+    // Set cookies
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+      maxAge: 10 * 60 * 1000, // 10 mins
+    });
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return res.status(200).json({ message: "Token refreshed" });
+  } catch (err) {
+    console.error("Refresh error:", err);
+    return res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
+};
+
+
 // Worker Register
 exports.register = async (req, res) => {
   const { email, firstname, lastname, username, password, services } = req.body;
@@ -54,6 +144,8 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       services: Array.isArray(services) ? services : [],
     });
+
+    await sendRegistrationEmail(email, firstname);
 
     res.status(201).json({
       message: "User registered successfully",
@@ -86,13 +178,23 @@ exports.login = async (req, res) => {
     const accessToken = generateAccessToken(worker,"worker");
     const refreshToken = await generateRefreshToken(worker);
 
+    res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+        maxAge: 30 * 60 * 1000, // 30 minutes
+      });
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
     // ✅ Send username in response
     res.json({
-      accessToken,
-      refreshToken,
-      username: worker.username,
-      email:worker.email,
-      role:worker.role
+      message: "Login Successfull!"
     });
 
   } catch (err) {
@@ -195,26 +297,59 @@ exports.updateAvatar = async (req, res) => {
   }
 };
 
-// // In routes/worker.js
 exports.updateInfo = async (req, res) => {
   try {
+    const {
+      firstname,
+      lastname,
+      dob,
+      phone,
+      location,
+      state,
+      city,
+      gender,
+      description
+    } = req.body;
+
+    // Check if all fields are filled in
+    const allFieldsPresent = [
+      firstname,
+      lastname,
+      dob,
+      phone,
+      location,
+      state,
+      city,
+      gender,
+      description
+    ].every(field => field && field.toString().trim() !== "");
+
+    const profileUpdateStatus = allFieldsPresent;
+
     const updated = await Worker.findByIdAndUpdate(
       req.user.id,
       {
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        dob: req.body.dob,
-        phone: req.body.phone,
-        location: req.body.location,
-        description: req.body.description,
+        firstname,
+        lastname,
+        dob,
+        phone,
+        location,
+        state,
+        city,
+        gender,
+        description,
+        profileUpdateStatus // ✅ status based on field completeness
       },
       { new: true }
     );
-    res.json({message:"Updated Successfully!"});
+
+    res.json({ message: "Updated Successfully!" });
   } catch (err) {
+    console.error("Worker update error:", err);
     return res.status(500).json({ message: 'Failed to update info' });
   }
 };
+
 
 
 // PATCH /api/worker/add-service
@@ -455,6 +590,8 @@ exports.customerRegister = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    await sendCustomerWelcomeEmail(email, firstname);
+
     const newCustomer = await Customer.create({
       email,
       firstname,
@@ -462,6 +599,7 @@ exports.customerRegister = async (req, res) => {
       username,
       password: hashedPassword
     });
+
 
     res.status(201).json({ message: "Customer registered successfully" });
 
@@ -490,17 +628,51 @@ exports.customerLogin = async (req, res) => {
      const accessToken = generateAccessToken(customer,"customer");
      const refreshToken = await generateRefreshToken(customer)
 
+     res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 30 minutes
+      });
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+
     res.status(200).json({
       message: "Login successful",
-      accessToken,refreshToken,
-      username:customer.username,
-      email:customer.email,
-      role:customer.role
     });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
 };
+
+exports.getRequireInfo = async (req, res) => {
+  try {
+    const { role, id } = req.user; 
+
+    let user;
+    if (role === "customer") {
+      user = await Customer.findById(id).select("username email role profileUpdateStatus");
+    } else if (role === "worker") {
+      user = await Worker.findById(id).select("username email role profileUpdateStatus");
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (err) {
+    console.error("getRequireInfo error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 // CUSTOMER PROFILE UPDATE
 exports.updateCustomerProfile = async (req, res) => {
@@ -559,19 +731,42 @@ exports.custUpdateAvatar = async (req, res) => {
 
 exports.custUpdateInfo = async (req, res) => {
   try {
+    const {
+      firstname,
+      lastname,
+      dob,
+      phone,
+      location,
+      state,
+      city,
+      gender
+    } = req.body;
+
+    // Check if all fields are non-empty for setting profileUpdateStatus
+    const allFieldsPresent = [firstname, lastname, dob, phone, location, state, city, gender]
+      .every(field => field && field.toString().trim() !== "");
+
+    const profileUpdateStatus = allFieldsPresent;
+
     const updated = await Customer.findByIdAndUpdate(
       req.user.id,
       {
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        dob: req.body.dob,
-        phone: req.body.phone,
-        location: req.body.location,
+        firstname,
+        lastname,
+        dob,
+        phone,
+        location,
+        state,
+        city,
+        gender,
+        profileUpdateStatus // ← update status based on completeness
       },
       { new: true }
     );
-    res.json({message:"Updated Successfully!"});
+
+    res.json({ message: "Updated Successfully!" });
   } catch (err) {
+    console.error("Update error:", err);
     return res.status(500).json({ message: 'Failed to update info' });
   }
 };
@@ -768,6 +963,9 @@ exports.getCustWorkReq = async (req, res) => {
       workerFirstName: workerUser.firstname,
       workerLastName: workerUser.lastname,
       workerPhoneNumber: workerUser.phone,
+      workerLocation: workerUser.city,
+      customerAvatar: customerUser.avatar,
+      workerAvatar: workerUser.avatar,
       scheduleDate: new Date(scheduleDate),
       timeSlot
     });
@@ -911,8 +1109,8 @@ exports.getChatMessages = async (req, res) => {
           name: role === "worker"
             ? `${req.customerFirstName} ${req.customerLastName}`
             : `${req.workerFirstName} ${req.workerLastName}`,
-          location: role === "worker" ? req.customerLocation : req.workerLocation || "RJY",
-          avatar: "https://i.pravatar.cc/150?u=" + key,
+          location: role === "worker" ? req.customerLocation : req.workerLocation,
+          avatar: role === "worker" ? req.customerAvatar : req.workerAvatar,
           lastMessage: lastMsg?.message || "",
           lastMessageAt: lastMsg?.createdAt || null,
         });
@@ -925,8 +1123,6 @@ exports.getChatMessages = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
 
 
 
@@ -985,8 +1181,10 @@ exports.acceptRequest = async (req, res) => {
       updateFields,
       { new: true }
     );
+    await updateWorkerAvailability(workerId);
 
     res.status(200).json({
+      success: true,
       message: `Request ${workerStatus} successfully`,
       data: updatedRequest,
     });
@@ -997,3 +1195,32 @@ exports.acceptRequest = async (req, res) => {
 };
 
 
+
+exports.logout = async (req, res) => {
+  try {
+    const token = req.cookies.refreshToken;
+
+    // Clear the cookies
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      sameSite: "Strict",
+      secure: true,
+    });
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      sameSite: "Strict",
+      secure: true,
+    });
+
+    // Delete the token from DB
+    if (token) {
+      await RefreshToken.deleteOne({ token });
+    }
+
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (err) {
+    console.error("Logout error:", err);
+    res.status(500).json({ message: "Logout failed", error: err.message });
+  }
+};
