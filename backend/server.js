@@ -9,7 +9,10 @@ const http = require('http');
 const socketIO = require('socket.io');
 const cookieParser = require("cookie-parser");
 
-
+const allowedOrigins = [
+  "http://localhost:3000", // for local dev
+  "https://workbuddy-frontend.onrender.com" // replace with actual frontend Render domain
+];
 
 // Config
 dotenv.config();
@@ -18,7 +21,7 @@ connectDB();
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: allowedOrigins,
   credentials: true,
 }));
 app.use(cookieParser());
@@ -29,7 +32,7 @@ const server = http.createServer(app);
 // Initialize Socket.io
 const io = socketIO(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: allowedOrigins,
     methods: ['GET', 'POST']
   }
 });
