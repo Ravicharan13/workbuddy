@@ -39,7 +39,7 @@ const ForgotPasswordPage = () => {
   const loadingToastId = toast.loading("Sending reset code...");
 
   try {
-    const response = await axios.post(`${API_URL}/auth/customer/send-resetcode`, { email });
+    const response = await axios.post(`${API_URL}/api/auth/customer/send-resetcode`, { email });
     
     toast.update(loadingToastId, {
       render: response.data.message || "Reset code sent to your email",
@@ -67,7 +67,7 @@ const ForgotPasswordPage = () => {
   }
 
   try {
-    const response = await axios.post(`${API_URL}/auth/customer/verify-resetcode`, {
+    const response = await axios.post(`${API_URL}/api/auth/customer/verify-resetcode`, {
       email,
       code: fullCode
     });

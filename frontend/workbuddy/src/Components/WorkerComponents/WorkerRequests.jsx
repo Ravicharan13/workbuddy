@@ -19,7 +19,7 @@ export default function WorkerRequests() {
   const fetchRequests = async () => {
     setLoading(true)
     try {
-      const res = await axiosInstance.get("/auth/getallwork");
+      const res = await axiosInstance.get("/api/auth/getallwork");
       const data = res.data;
 
       console.log(data);
@@ -62,7 +62,7 @@ export default function WorkerRequests() {
 
  const handleAccept = async (id) => {
   try {
-    const res = await axiosInstance.put("/auth/accept", {
+    const res = await axiosInstance.put("/api/auth/accept", {
         requestId: id,
         workerStatus: "accepted",
       });
@@ -87,7 +87,7 @@ export default function WorkerRequests() {
   if (!reasonInput.trim()) return;
 
   try {
-    const res = await axiosInstance.put("/auth/accept", {
+    const res = await axiosInstance.put("/api/auth/accept", {
       requestId: id,
       workerStatus: 'rejected',
       workerReason: reasonInput

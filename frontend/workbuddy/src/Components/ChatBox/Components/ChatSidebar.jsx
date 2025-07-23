@@ -10,7 +10,7 @@ export default function ChatSidebar({ onSelectChat, userRole }) {
 
   const fetchChats = async () => {
     try {
-      const res = await axiosInstance.get("/auth/chats");
+      const res = await axiosInstance.get("/api/auth/chats");
       setConversations(res.data);
     } catch (err) {
       console.error("Failed to fetch chats", err);

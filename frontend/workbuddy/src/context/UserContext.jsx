@@ -33,7 +33,7 @@ export const UserProvider = ({ children }) => {
 useEffect(() => {
   const fetchUser = async () => {
     try {
-      const response = await axiosInstance.get("auth/get-require-info");
+      const response = await axiosInstance.get("/api/auth/get-require-info");
       setUser({ ...response.data, isLogin: true });
     } catch (err) {
       setUser(null);

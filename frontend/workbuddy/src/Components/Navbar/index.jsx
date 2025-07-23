@@ -7,7 +7,6 @@ import { House,HeartHandshake, MessageSquareText } from 'lucide-react';
 
 const Navbar = ({ isDark, setIsDark }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const { user, setUser } = useUser();
 
@@ -17,7 +16,7 @@ const Navbar = ({ isDark, setIsDark }) => {
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
   const handleLogout = async () => {
-    await axiosInstance.post("/auth/logout", {}, { withCredentials: true });
+    await axiosInstance.post("/api/auth/logout", {}, { withCredentials: true });
     localStorage.clear();
     setUser(null);
     navigate("/customerauth?mode=login");

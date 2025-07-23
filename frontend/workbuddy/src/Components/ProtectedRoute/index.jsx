@@ -32,7 +32,7 @@ const ProtectedRoute = ({ children, role }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await axiosInstance.get("/auth/me", {
+        const response = await axiosInstance.get("/api/auth/me", {
           withCredentials: true, // ✅ sends the cookie
         });
 

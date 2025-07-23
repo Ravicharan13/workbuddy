@@ -57,7 +57,7 @@ const WorkerAuthPage = () => {
   try {
     toast.loading("Logging in...");
 
-    await axios.post(`${API_URL}/auth/login`, loginData, {
+    await axios.post(`${API_URL}/api/auth/login`, loginData, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -68,7 +68,7 @@ const WorkerAuthPage = () => {
     toast.success("Welcome Back!");
 
 
-    const response = await axiosInstance.get("/auth/get-require-info", {
+    const response = await axiosInstance.get("/api/auth/get-require-info", {
       withCredentials: true,
     });
 
@@ -130,7 +130,7 @@ const WorkerAuthPage = () => {
   try {
     toast.loading("Registering...");
 
-    await axios.post(`${API_URL}/auth/worker/register`, signupData, {
+    await axios.post(`${API_URL}/api/auth/worker/register`, signupData, {
       headers: { "Content-Type": "application/json" },
       withCredentials: true, // 👈 this is optional here (only needed if backend sets cookies on register)
     });

@@ -53,7 +53,7 @@ export default function BrowseServicesPage() {
   const fetchWorkers = async () => {
     setLoading(true);
     try {
-      const res = await axiosInstance.get("/auth/workers");
+      const res = await axiosInstance.get("/api/auth/workers");
       setOriginalData(res.data);
       setFilteredData(res.data);
     } catch (err) {
@@ -137,7 +137,7 @@ export default function BrowseServicesPage() {
     }
 
     try {
-      await axiosInstance.post('/auth/workreq', {
+      await axiosInstance.post('/api/auth/workreq', {
         customerEmail: user.email,
         workerEmail,
         serviceWanted: selectedService,

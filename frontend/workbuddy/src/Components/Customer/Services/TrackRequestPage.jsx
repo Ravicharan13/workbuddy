@@ -20,7 +20,7 @@ export default function TrackRequestPage() {
     setLoading(true); // ✅ Show loading spinner before fetching
 
     try {
-      const res = await axiosInstance.get("/auth/getallcust");
+      const res = await axiosInstance.get("/api/auth/getallcust");
       const data = res.data;
 
       console.log(data);
@@ -68,7 +68,7 @@ export default function TrackRequestPage() {
   try {
     console.log(cancelId);
 
-    const res = await axiosInstance.put(`/auth/customercancelrequest/${cancelId}`);
+    const res = await axiosInstance.put(`/api/auth/customercancelrequest/${cancelId}`);
 
     if (res.data.success) {
       toast.success("Request cancelled successfully");

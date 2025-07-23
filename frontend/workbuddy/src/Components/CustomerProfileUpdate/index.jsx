@@ -53,7 +53,7 @@ const ProfilePage = ({ isDark, setIsDark }) => {
   try {
     setImage(imgUrl);
 
-    await axiosInstance.patch('/auth/customer/update-avatar', {
+    await axiosInstance.patch('/api/auth/customer/update-avatar', {
       avatar: imgUrl,
     });
 
@@ -75,7 +75,7 @@ const ProfilePage = ({ isDark, setIsDark }) => {
   useEffect(() => {
   const fetchCustomerProfile = async () => {
     try {
-      const res = await axiosInstance.get('/auth/customer/profile');
+      const res = await axiosInstance.get('/api/auth/customer/profile');
 
       const { firstname, lastname, dob, phone, location, city, state, gender } = res.data;
       setInfo({ firstname, lastname, dob, phone, location, gender });
@@ -120,7 +120,7 @@ const ProfilePage = ({ isDark, setIsDark }) => {
 
 const handleSave = async () => {
   try {
-    await axiosInstance.patch('/auth/customer/update-info', {
+    await axiosInstance.patch('/api/auth/customer/update-info', {
       ...info,
       state: selectedState?.value || '',
       city: selectedCity?.value || ''
@@ -241,7 +241,7 @@ const formatDateForInput = (isoDate) => {
   }
 
   try {
-    await axiosInstance.patch('/auth/customer/change-password', {
+    await axiosInstance.patch('/api/auth/customer/change-password', {
       currentPassword: formData.currentPassword,
       newPassword: formData.newPassword,
     });

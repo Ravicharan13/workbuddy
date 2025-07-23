@@ -1,3 +1,3 @@
-const API_URL = "https://workbuddy-zlbk.onrender.com/api";
-const SOCKET_URL = "http://localhost:5000";
+const API_URL = "https://workbuddy-k791.onrender.com";
+const SOCKET_URL = "https://workbuddy-k791.onrender.com";
 export  {API_URL, SOCKET_URL};

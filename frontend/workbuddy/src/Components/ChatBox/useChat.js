@@ -25,7 +25,7 @@ useEffect(() => {
     email: user.email,
   });
 
-  axiosInstance.get(`/auth/message/${chatRoomId}`)
+  axiosInstance.get(`/api/auth/message/${chatRoomId}`)
     .then((res) => {
       const sorted = res.data.sort((a, b) =>
         new Date(a.timestamp || a.createdAt) - new Date(b.timestamp || b.createdAt)

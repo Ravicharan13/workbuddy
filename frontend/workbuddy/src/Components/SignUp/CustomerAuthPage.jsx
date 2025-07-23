@@ -97,7 +97,7 @@ const handleSignup = async () => {
 
   try {
     toast.loading("Registering...");
-    const response = await axios.post( `${API_URL}/auth/customer/register`, signupData, {
+    const response = await axios.post( `${API_URL}/api/auth/customer/register`, signupData, {
       headers: { "Content-Type": "application/json" },
       withCredentials: true, // if backend sets httpOnly cookies
     });
@@ -129,7 +129,7 @@ const handleLogin = async (e) => {
 
   try {
     toast.loading("Logging in...");
-    await axios.post(`${API_URL}/auth/customer/login`, loginData, {
+    await axios.post(`${API_URL}/api/auth/customer/login`, loginData, {
       headers: { "Content-Type": "application/json" },
       withCredentials: true, // important if backend sets cookies
     });
@@ -137,7 +137,7 @@ const handleLogin = async (e) => {
     toast.dismiss();
     toast.success("Login successful!");
 
-    const response = await axiosInstance.get("/auth/get-require-info", {
+    const response = await axiosInstance.get("/api/auth/get-require-info", {
       withCredentials: true,
     });
     const data = response.data;

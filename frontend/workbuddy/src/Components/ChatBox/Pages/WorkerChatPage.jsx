@@ -23,7 +23,7 @@ export default function WorkerChatPage() {
 
       setLoading(true);
       try {
-        const res = await axiosInstance.get("/auth/chats");
+        const res = await axiosInstance.get("/api/auth/chats");
         const found = res.data.find(chat => chat.chatRoomId === chatRoomId);
         setActiveChat(found || null);
       } catch (err) {

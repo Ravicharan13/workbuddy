@@ -96,7 +96,7 @@ const handleInputChange = (e) => {
   try {
     setImage(imgUrl);
 
-    const res = await axiosInstance.patch('/auth/worker/update-avatar', {
+    const res = await axiosInstance.patch('/api/auth/worker/update-avatar', {
       avatar: imgUrl,
     });
 
@@ -119,7 +119,7 @@ const handleInputChange = (e) => {
   useEffect(() => {
   const fetchWorkerProfile = async () => {
     try {
-      const res = await axiosInstance.get('/auth/worker/profile');
+      const res = await axiosInstance.get('/api/auth/worker/profile');
 
       const { firstname, lastname, dob, phone, location, description, services, gender, state, city, profileUpdateStatus } = res.data;
       setInfo({ firstname, lastname, dob, phone, location, description, gender });
@@ -174,7 +174,7 @@ const handleInputChange = (e) => {
 
   const handleSave = async () => {
   try {
-    await axiosInstance.patch('/auth/worker/update-info', {
+    await axiosInstance.patch('/api/auth/worker/update-info', {
       ...info,
       state: selectedState?.value || '',
       city: selectedCity?.value || ''
@@ -273,7 +273,7 @@ const customSelectStyles = (isDark, isEditing) => ({
   if (!serviceInput.trim()) return;
 
   try {
-    const res = await axiosInstance.post('/auth/worker/services', {
+    const res = await axiosInstance.post('/api/auth/worker/services', {
       name: serviceInput
     });
     setServices((prev) => [...prev, res.data]);
@@ -288,7 +288,7 @@ const customSelectStyles = (isDark, isEditing) => ({
 
   const handleDeleteService = async (serviceId) => {
   try {
-    const res = await axiosInstance.delete(`/auth/worker/services/${serviceId}`);
+    const res = await axiosInstance.delete(`/api/auth/worker/services/${serviceId}`);
     console.log(res);
     setServices((prev) => prev.filter(service => service._id !== serviceId));
     toast.success("Service deleted successfully");
