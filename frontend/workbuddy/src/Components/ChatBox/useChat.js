@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import axiosInstance from "../../axiosInstance";
-
+import { SOCKET_URL } from "../../constants/constant";
+ // Adjust as needed
 // Global socket instance
-const socket = io("http://localhost:5000", {
+const socket = io(SOCKET_URL, {
   withCredentials: true,
   transports: ["websocket", "polling"],
 });

@@ -2,6 +2,7 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext" // updated context hook
+import { API_URL } from "../../constants/constant";
 
 const SERVICE_OPTIONS = ["Plumbing", "Electrician", "Carpentry", "Painting", "Cleaning"];
 
@@ -53,11 +54,11 @@ const SignUp = () => {
 
     const url = isLogin
       ? isCustomer
-        ? "http://localhost:5000/api/auth/customer/login"
-        : "http://localhost:5000/api/auth/login"
+        ? `${API_URL}/auth/customer/login`
+        : `${API_URL}/auth/login`
       : isCustomer
-        ? "http://localhost:5000/api/auth/customer/register"
-        : "http://localhost:5000/api/auth/worker/register";
+        ? `${API_URL}/auth/customer/register`
+        : `${API_URL}/auth/worker/register`;
 
     const payload = isLogin
       ? { email: formData.email, password: formData.password }

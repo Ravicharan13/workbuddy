@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axiosInstance from "../../../axiosInstance";
 import { format, isToday, isYesterday } from "date-fns";
 import { io } from "socket.io-client";
+import { SOCKET_URL } from "../../../constants/constant";
 
 export default function ChatSidebar({ onSelectChat, userRole }) {
   const [conversations, setConversations] = useState([]);
@@ -20,7 +21,7 @@ export default function ChatSidebar({ onSelectChat, userRole }) {
     fetchChats(); // initial fetch
 
     // Initialize socket only once
-    socketRef.current = io("http://localhost:5000", {
+    socketRef.current = io(SOCKET_URL, {
       transports: ["websocket"],
     });
 

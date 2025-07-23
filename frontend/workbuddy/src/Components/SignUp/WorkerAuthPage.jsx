@@ -6,6 +6,7 @@ import { useUser } from "../../context/UserContext"
 import axios from "axios";
 import { toast } from "react-toastify";
 import axiosInstance from "../../axiosInstance";
+import { API_URL } from "../../constants/constant";
 
 
 const WorkerAuthPage = () => {
@@ -56,7 +57,7 @@ const WorkerAuthPage = () => {
   try {
     toast.loading("Logging in...");
 
-    await axios.post("http://localhost:5000/api/auth/login", loginData, {
+    await axios.post(`${API_URL}/auth/login`, loginData, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -129,7 +130,7 @@ const WorkerAuthPage = () => {
   try {
     toast.loading("Registering...");
 
-    await axios.post("http://localhost:5000/api/auth/worker/register", signupData, {
+    await axios.post(`${API_URL}/auth/worker/register`, signupData, {
       headers: { "Content-Type": "application/json" },
       withCredentials: true, // 👈 this is optional here (only needed if backend sets cookies on register)
     });

@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import {useUser} from "../../context/UserContext"
 import axiosInstance from "../../axiosInstance";
+import { API_URL } from "../../constants/constant";
 
 const CustomerAuthPage = () => {
   const navigate = useNavigate();
@@ -96,7 +97,7 @@ const handleSignup = async () => {
 
   try {
     toast.loading("Registering...");
-    const response = await axios.post("http://localhost:5000/api/auth/customer/register", signupData, {
+    const response = await axios.post( `${API_URL}/auth/customer/register`, signupData, {
       headers: { "Content-Type": "application/json" },
       withCredentials: true, // if backend sets httpOnly cookies
     });
@@ -128,7 +129,7 @@ const handleLogin = async (e) => {
 
   try {
     toast.loading("Logging in...");
-    await axios.post("http://localhost:5000/api/auth/customer/login", loginData, {
+    await axios.post(`${API_URL}/auth/customer/login`, loginData, {
       headers: { "Content-Type": "application/json" },
       withCredentials: true, // important if backend sets cookies
     });

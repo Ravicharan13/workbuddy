@@ -1,9 +1,10 @@
 // src/api/axiosInstance.js
 import axios from "axios";
+import {API_URL} from "./constants/constant.js";
 
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: API_URL,
   withCredentials: true, // 🟢 Needed for cookie-based tokens
 });
 
@@ -18,7 +19,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         await axios.post(
-          "http://localhost:5000/api/auth/refresh",
+          `${API_URL}/auth/refresh`,
           {},
           { withCredentials: true }
         );
