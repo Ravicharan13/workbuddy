@@ -123,7 +123,7 @@ const ForgotPasswordPage = () => {
 
 
   return (
-    <div className="h-[91vh]  md:h-[90vh] flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="h-[90vh]  md:h-[90vh] flex items-center justify-center bg-gray-50 dark:bg-gray-900">
       <div className="w-[80%] md:w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-sm ">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">

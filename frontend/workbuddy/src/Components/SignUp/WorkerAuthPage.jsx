@@ -154,7 +154,7 @@ const WorkerAuthPage = () => {
   
 
   return (
-    <div className="min-h-screen md:min-h-0 md:h-[60vh] lg:h-[90vh] flex items-center justify-center bg-gray-100 p-4 dark:bg-gray-900">
+    <div className="h-full md:min-h-0 md:h-[60vh] lg:h-[90vh] flex items-center justify-center bg-gray-100 p-4 dark:bg-gray-900">
       <div className="w-full h-[90%] max-w-6xl bg- dark:bg-gray-800 rounded-sm dark:shadow-sm dark:shadow-slate-700 flex flex-col md:flex-row overflow-hidden">
         {/* Left Form */}
         <div className="w-full h-full md:w-2/3 lg:w-[1000px] px-10 py-6 bg-white dark:bg-gray-800">

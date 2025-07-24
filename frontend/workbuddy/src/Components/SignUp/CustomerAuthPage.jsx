@@ -159,7 +159,7 @@ const handleLogin = async (e) => {
 
 
   return (
-    <div className="min-h-screen md:min-h-0 md:h-[60vh] lg:h-[90vh] flex items-center justify-center bg-gray-100 p-4 dark:bg-gray-900">
+    <div className="h-full md:min-h-0 md:h-[60vh] lg:h-[90vh] flex items-center justify-center bg-gray-100 p-4 dark:bg-gray-900">
       <div className="w-full h-[90%] max-w-6xl bg-white dark:bg-gray-800 dark:rounded-sm shadow-sm dark:shadow-slate-700 flex flex-col md:flex-row overflow-hidden">
         {/* Left - Worker Options */}
         <div className="w-full md:w-2/3  bg-gray-800 dark:bg-gray-900 flex flex-col items-center justify-center p-8 space-y-1">
