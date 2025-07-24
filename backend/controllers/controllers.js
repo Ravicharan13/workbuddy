@@ -8,7 +8,7 @@ const Request = require("../models/WorkerCustomerRequest")
 const { v4: uuidv4 } = require("uuid");
 const Message = require("../models/Message")
 const updateWorkerAvailability = require("../utils/updateWorkerAvailability")
-const { sendRegistrationEmail, sendCustomerWelcomeEmail, sendPasswordChangeEmail, sendResetCodeEmail, sendServiceRequestEmailToWorker } = require("../utils/mailer");
+const { sendRegistrationEmail, sendCustomerWelcomeEmail, sendPasswordChangeEmail, sendResetCodeEmail, sendServiceRequestEmailToWorker, sendWorkerAcceptedEmail, sendWorkerRejectedEmail } = require("../utils/mailer");
 
 // Generate Access Token
 const generateAccessToken = (user, role) => {
