@@ -954,9 +954,19 @@ exports.getCustWorkReq = async (req, res) => {
       timeSlot
     });
 
-    await sendServiceRequestEmailToWorker(workerUser.firstname,workerEmail,customerUser.firstname,customerEmail,customerUser.phone,serviceWanted,customerLocation,scheduleDate,timeSlot)
-
     await newRequest.save();
+    await sendServiceRequestEmailToWorker({
+      workerName: workerUser.firstname,
+      workerEmail: workerEmail,
+      customerName: customerUser.firstname,
+      customerEmail: customerEmail,
+      customerPhone: customerUser.phone,
+      customerLocation: customerLocation,
+      serviceWanted: serviceWanted,
+      scheduleDate: scheduleDate,
+      timeSlot: timeSlot
+    });
+
     return res.status(201).json({ message: "Request sent successfully", data: newRequest });
 
   } catch (err) {

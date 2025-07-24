@@ -262,7 +262,7 @@ const sendServiceRequestEmailToWorker = async ({
   const mailOptions = {
     from: `"WorkBuddy" <${process.env.EMAIL_USER}>`,
     to: workerEmail,
-    subject: "📩 New Service Request Received!",
+    subject: "New Service Request Received!",
     html: `
       <div style="font-family: Arial, sans-serif; background-color: #f5f8fa; padding: 30px;">
         <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 2px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
