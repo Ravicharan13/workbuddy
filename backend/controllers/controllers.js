@@ -1034,7 +1034,7 @@ exports.customerCancelRequest = async (req, res) => {
   if (request.workerStatus === "pending") {
     request.workerStatus = "cancelled";
     await request.save();
-    return res.json({ message: "Request cancelled due to no response" });
+    return res.status(200).json({ message: "Request cancelled due to no response" });
   }
   return res.status(400).json({ message: "Cannot cancel — already processed or invalid state." });
 }

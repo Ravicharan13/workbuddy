@@ -135,7 +135,7 @@ export default function BrowseServicesPage() {
       toast.warning("All required fields must be filled.");
       return;
     }
-
+    toast.loading("Sending Reqest...")
     try {
       await axiosInstance.post('/api/auth/workreq', {
         customerEmail: user.email,
@@ -145,7 +145,7 @@ export default function BrowseServicesPage() {
         scheduleDate: selectedDate.toISOString(),
         timeSlot: selectedTimeSlot,
       });
-
+      toast.dismiss();
       toast.success("Service request submitted successfully!");
       setConfirmRequest(null);
       setShowServiceForm(false);

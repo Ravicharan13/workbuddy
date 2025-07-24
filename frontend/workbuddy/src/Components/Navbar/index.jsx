@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import axiosInstance from "../../axiosInstance";
 import { House,HeartHandshake, MessageSquareText } from 'lucide-react';
+import {toast} from "react-toastify"
 
 const Navbar = ({ isDark, setIsDark }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -16,10 +17,16 @@ const Navbar = ({ isDark, setIsDark }) => {
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
   const handleLogout = async () => {
-    await axiosInstance.post("/api/auth/logout", {}, { withCredentials: true });
-    localStorage.clear();
-    setUser(null);
-    navigate("/customerauth?mode=login");
+    try{
+      toast.loading("Logging Out...")
+      await axiosInstance.post("/api/auth/logout", {}, { withCredentials: true });
+      toast.dismiss();
+      localStorage.clear();
+      setUser(null);
+      navigate("/customerauth");
+    }catch(err){
+      toast.error(err.message)
+    }
   };
 
   const closeMenu = () => setMenuOpen(false);

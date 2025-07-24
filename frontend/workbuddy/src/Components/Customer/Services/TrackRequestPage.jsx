@@ -64,27 +64,39 @@ export default function TrackRequestPage() {
 }, []);
 
 
-  const handleCancelConfirmed = async () => {
+const handleCancelConfirmed = async () => {
+  const loadingId = toast.loading("Request Cancelling...");
   try {
-    console.log(cancelId);
-
     const res = await axiosInstance.put(`/api/auth/customercancelrequest/${cancelId}`);
 
-    if (res.data.success) {
-      toast.success("Request cancelled successfully");
-      const updated = requests.map((req) =>
-        req.id === cancelId ? { ...req, status: 'cancelled' } : req // 🛠 lowercase 'cancelled' to match status filter
-      );
-      setRequests(updated);
+    if (res?.data?.success) {
+      try {
+        // ✅ This inner try block prevents errors from falling into the outer catch
+        const updated = requests.map((req) =>
+          req.id === cancelId ? { ...req, status: 'cancelled' } : req
+        );
+        setRequests(updated);
+
+        toast.dismiss(loadingId);
+        toast.success("Request cancelled successfully");
+      } catch (innerError) {
+        toast.dismiss(loadingId);
+        console.error("UI update error:", innerError);
+        toast.error("Cancelled, but something went wrong updating the UI.");
+      }
     } else {
-      throw new Error(res.data.message || "Failed to cancel request");
+      throw new Error(res?.data?.message || "Failed to cancel request");
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Error cancelling request.');
+    toast.dismiss(loadingId);
+    console.error("API error:", error);
+    toast.error(error?.response?.data?.message || error.message || 'Error cancelling request.');
   } finally {
-    setCancelId(null); // hide modal
+    setCancelId(null); // Close the modal
   }
 };
+
+
   return (
     <>
     {loading && <div className="flex items-center justify-center h-screen text-gray-600 dark:text-gray-300 dark:bg-gray-900">
