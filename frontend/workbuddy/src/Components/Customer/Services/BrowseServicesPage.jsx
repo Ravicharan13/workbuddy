@@ -152,6 +152,7 @@ export default function BrowseServicesPage() {
       setSelectedService('');
       setUserLocation('');
     } catch (err) {
+      toast.dismiss();
       toast.error(err.response?.data?.message || 'Request failed');
     }
   };

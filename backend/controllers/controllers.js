@@ -961,7 +961,7 @@ exports.getCustWorkReq = async (req, res) => {
 
   } catch (err) {
     console.error("Error sending request:", err);
-    return res.status(500).json({ message: "Server error", error: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
