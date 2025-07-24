@@ -43,7 +43,8 @@ const {
   getMe,
   logout,
   getRequireInfoCust,
-  getRequireInfo
+  getRequireInfo,
+  workerChangePassword
 } = require("../controllers/controllers");
 
 router.get("/get-require-info",auth,getRequireInfo)
@@ -67,7 +68,7 @@ router.patch("/worker/update-info",auth,role("worker"),updateInfo)
 router.post('/worker/services', auth,role("worker"), addService);
 router.delete('/worker/services/:serviceId', auth,role("worker"), deleteService);
 router.delete('/worker/services', auth,role("worker"), deleteAllServices);
-router.patch("/worker/change-password",auth,role("worker"),changePassword)
+router.patch("/worker/change-password",auth,role("worker"),workerChangePassword)
 
 // Customer routes
 router.post("/customer/register", customerRegister);

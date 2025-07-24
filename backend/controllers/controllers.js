@@ -424,17 +424,17 @@ exports.deleteAllServices = async (req, res) => {
 };
 
 
-exports.changePassword = async (req, res) => {
+exports.workerChangePassword = async (req, res) => {
+
+  try {
   const { currentPassword, newPassword } = req.body;
   const workerId = req.user.id;
 
   if (!currentPassword || !newPassword) {
     return res.status(400).json({ message: 'All fields are required.' });
   }
-
-  try {
     const worker = await Worker.findById(workerId);
-    if (!worker) return res.status(404).json({ message: 'Worker not found' });
+    if (!worker) return res.status(404).json({ message: "Worker not found" });
 
     const isMatch = await bcrypt.compare(currentPassword, worker.password);
     if (!isMatch) return res.status(401).json({ message: 'Incorrect current password' });
