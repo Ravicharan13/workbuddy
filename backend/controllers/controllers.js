@@ -1153,19 +1153,17 @@ exports.acceptRequest = async (req, res) => {
       workerLastName: worker.lastname,
     };
 
-    // ✅ Only if accepted, check for existing chatRoomId
+    // ✅ Generate or reuse chatRoomId only if accepted or completed
     if (workerStatus === "accepted" || workerStatus === "completed") {
       const existingChat = await Request.findOne({
         customerEmail: request.customerEmail,
         workerEmail: worker.email,
-        chatRoomId: { $ne: null }
-      }).sort({ requestSentAt: -1 }); // latest request first
+        chatRoomId: { $ne: null },
+      }).sort({ requestSentAt: -1 });
 
-      if (existingChat) {
-        updateFields.chatRoomId = existingChat.chatRoomId;
-      } else {
-        updateFields.chatRoomId = uuidv4(); // generate new
-      }
+      updateFields.chatRoomId = existingChat
+        ? existingChat.chatRoomId
+        : uuidv4();
     }
 
     if (workerStatus === "rejected") {
@@ -1177,32 +1175,43 @@ exports.acceptRequest = async (req, res) => {
       updateFields,
       { new: true }
     );
+
     await updateWorkerAvailability(workerId);
 
-    if (workerStatus === "accepted") {
     const workerName = `${worker.firstname} ${worker.lastname}`;
-    await sendWorkerAcceptedEmail({
-      customerName: request.customerFirstName,
-      customerEmail: request.customerEmail,
-      workerName: workerName,
-      serviceWanted: request.serviceWanted,
-      scheduleDate: request.scheduleDate,
-      timeSlot: request.timeSlot,
-      workerEmail: request.workerEmail,
-      workerPhone: request.workerPhoneNumber
-    });
-  }
 
-  if (workerStatus === "rejected") {
-  const workerName = `${worker.firstname} ${worker.lastname}`;
-  await sendWorkerRejectedEmail({
-    customerName: request.customerFirstName,
-    customerEmail: request.customerEmail,
-    workerName,
-    serviceWanted: request.serviceWanted,
-    rejectReason: workerReason,
-  });
-}
+    // ✅ Safely send email for accepted request
+    if (workerStatus === "accepted") {
+      try {
+        await sendWorkerAcceptedEmail({
+          customerName: request.customerFirstName,
+          customerEmail: request.customerEmail,
+          workerName,
+          serviceWanted: request.serviceWanted,
+          scheduleDate: request.scheduleDate,
+          timeSlot: request.timeSlot,
+          workerEmail: worker.email,
+          workerPhone: worker.phoneNumber, // ensure `phoneNumber` is correct field
+        });
+      } catch (mailErr) {
+        console.error("Failed to send accepted email:", mailErr.message);
+      }
+    }
+
+    // ✅ Safely send email for rejected request
+    if (workerStatus === "rejected") {
+      try {
+        await sendWorkerRejectedEmail({
+          customerName: request.customerFirstName,
+          customerEmail: request.customerEmail,
+          workerName,
+          serviceWanted: request.serviceWanted,
+          rejectReason: workerReason,
+        });
+      } catch (mailErr) {
+        console.error("Failed to send rejected email:", mailErr.message);
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -1211,7 +1220,7 @@ exports.acceptRequest = async (req, res) => {
     });
   } catch (err) {
     console.error("Error updating request status:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
