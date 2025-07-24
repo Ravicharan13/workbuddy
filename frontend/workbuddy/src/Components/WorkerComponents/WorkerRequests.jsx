@@ -75,9 +75,11 @@ export default function WorkerRequests() {
           prev.map(r => r.id === id ? { ...r, status: 'accepted', reason: '' } : r)
         );
       } else {
+        toast.dismiss();
         toast.error(res.data.message || 'Failed to accept request.');
       }
   } catch (error) {
+    toast.dismiss();
     toast.error('Error while accepting request.');
 
   }
@@ -107,9 +109,11 @@ export default function WorkerRequests() {
       setRejectingId(null);
       setReasonInput('');
     } else {
+      toast.dismiss();
       toast.error(res.data.message || 'Failed to reject request.');
     }
   } catch (error) {
+    toast.dismiss();
     toast.error(error.response?.data?.message || 'Error while rejecting request.');
   }
 };

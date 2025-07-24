@@ -150,6 +150,7 @@ const handleInputChange = (e) => {
         toast.warn("Please Update Your Profile, Then only show your profile to others!")
       }
     } catch (err) {
+      toast.dismiss();
       console.error(err);
       toast.error('Failed to load profile. Please try again.');
     } finally {
@@ -185,6 +186,7 @@ const handleInputChange = (e) => {
     toast.success("Profile updated!");
     setIsEditing(false);
   } catch (err) {
+    toast.dismiss();
     console.error(err);
     toast.error("Update failed");
   }
@@ -284,6 +286,7 @@ const customSelectStyles = (isDark, isEditing) => ({
     toast.dismiss();
     toast.success("Service added!");
   } catch (err) {
+    toast.dismiss();
     toast.error("Failed to add service");
     console.error(err);
   }
@@ -299,6 +302,7 @@ const customSelectStyles = (isDark, isEditing) => ({
     toast.dismiss();
     toast.success("Service deleted successfully");
   } catch (error) {
+    toast.dismiss();
     console.error("Delete service failed:", error);
     toast.error("Failed to delete service");
   }

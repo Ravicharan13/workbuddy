@@ -1184,7 +1184,7 @@ exports.acceptRequest = async (req, res) => {
     await sendWorkerAcceptedEmail({
       customerName: request.customerFirstName,
       customerEmail: request.customerEmail,
-      workerName,
+      workerName: workerName,
       serviceWanted: request.serviceWanted,
       scheduleDate: request.scheduleDate,
       timeSlot: request.timeSlot,

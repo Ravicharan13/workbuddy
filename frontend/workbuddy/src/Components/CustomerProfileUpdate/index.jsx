@@ -96,6 +96,7 @@ const ProfilePage = ({ isDark, setIsDark }) => {
       setProfile(res.data);
       console.log(res.data);
     } catch (err) {
+      toast.dismiss();
       console.error(err);
       toast.error('Failed to load profile. Please try again.');
     } finally {
@@ -131,6 +132,7 @@ const handleSave = async () => {
     toast.success("Profile updated!");
     setIsEditing(false);
   } catch (err) {
+    toast.dismiss();
     console.error(err);
     toast.error("Update failed");
   }
@@ -253,6 +255,7 @@ const formatDateForInput = (isoDate) => {
     setShowPasswordModal(false);
     setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
   } catch (err) {
+    toast.dismiss();
     console.error(err);
     toast.error(err.response?.data?.message || "Failed to change password");
   }
