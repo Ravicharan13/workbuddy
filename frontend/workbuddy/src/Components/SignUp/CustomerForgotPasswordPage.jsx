@@ -109,7 +109,7 @@ const ForgotPasswordPage = () => {
 
   try {
     toast.loading("Reseting password...")
-    const response = await axios.post(`${API_URL}/auth/customer/reset-password`, {
+    const response = await axios.post(`${API_URL}/api/auth/customer/reset-password`, {
       email,
       newPassword: password,
     });
