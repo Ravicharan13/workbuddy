@@ -2,6 +2,7 @@ const cron = require("node-cron");
 const Request = require("./models/WorkerCustomerRequest");
 const moment = require("moment");
 const updateWorkerAvailability = require("./utils/updateWorkerAvailability");
+const {sendAutoCancelledEmailToCustomer, sendAutoCompletedEmailToCustomer} = require("./utils/mailer")
 
 cron.schedule("*/30 * * * * *", async () => {
   try {
@@ -22,12 +23,33 @@ cron.schedule("*/30 * * * * *", async () => {
       if (now.isAfter(scheduled)) {
         if (request.workerStatus === "pending") {
           request.workerStatus = "cancelled";
+          await request.save()
+
           console.log(`[CRON] Request ${request._id} was pending and is now cancelled`);
+
+          await sendAutoCancelledEmailToCustomer({
+            customerName: request.customerFirstName,
+            customerEmail: request.customerEmail,
+            serviceWanted: request.serviceWanted,
+            scheduleDate: request.scheduleDate,
+            timeSlot: request.timeSlot
+          });
+          
+
         } else if (request.workerStatus === "accepted") {
           request.workerStatus = "completed";
           console.log(`[CRON] Request ${request._id} was accepted and is now completed`);
 
           await request.save();
+
+          await sendAutoCompletedEmailToCustomer({
+            customerName: request.customerFirstName,
+            customerEmail: request.customerEmail,
+            serviceWanted: request.serviceWanted,
+            scheduleDate: request.scheduleDate,
+            timeSlot: request.timeSlot
+          });
+
 
           await updateWorkerAvailability(request.workerId);
 

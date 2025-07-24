@@ -8,7 +8,7 @@ const Request = require("../models/WorkerCustomerRequest")
 const { v4: uuidv4 } = require("uuid");
 const Message = require("../models/Message")
 const updateWorkerAvailability = require("../utils/updateWorkerAvailability")
-const { sendRegistrationEmail, sendCustomerWelcomeEmail, sendPasswordChangeEmail } = require("../utils/mailer");
+const { sendRegistrationEmail, sendCustomerWelcomeEmail, sendPasswordChangeEmail, sendResetCodeEmail, sendServiceRequestEmailToWorker } = require("../utils/mailer");
 
 // Generate Access Token
 const generateAccessToken = (user, role) => {
@@ -480,20 +480,7 @@ exports.sendResetCodeWorker = async (req, res) => {
     user.resetCodeExpires = expires;
     await user.save();
 
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"WorkBuddy" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: 'WorkBuddy: Password Reset Code',
-      html: `<p>Your reset code is: <b>${code}</b></p><p>This code will expire in 15 minutes.</p>`,
-    });
+    await sendResetCodeEmail(user.email,user.firstname,code)
 
     res.json({ message: "Reset code sent to your email." });
   } catch (err) {
@@ -561,6 +548,8 @@ exports.resetPasswordWorker = async (req, res) => {
     user.resetCodeExpires = null;
     user.resetCodeVerified = false;
     await user.save();
+
+    await sendPasswordChangeEmail(user.email,user.firstname)
 
     return res.status(200).json({ message: 'Password reset successful' });
   } catch (error) {
@@ -822,20 +811,7 @@ exports.sendResetCodeCustomer = async (req, res) => {
     user.resetCodeExpires = expires;
     await user.save();
 
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"WorkBuddy" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: 'WorkBuddy: Password Reset Code',
-      html: `<p>Your reset code is: <b>${code}</b></p><p>This code will expire in 15 minutes.</p>`,
-    });
+    await sendResetCodeEmail(user.email, user.firstname, code);
 
     res.json({ message: "Reset code sent to your email." });
   } catch (err) {
@@ -901,6 +877,8 @@ exports.resetPasswordCustomer = async (req, res) => {
     user.resetCodeExpires = null;
     user.resetCodeVerified = false;
     await user.save();
+
+    await sendPasswordChangeEmail(user.email,user.firstname);
 
     return res.status(200).json({ message: 'Password reset successful' });
   } catch (error) {
@@ -975,6 +953,8 @@ exports.getCustWorkReq = async (req, res) => {
       scheduleDate: new Date(scheduleDate),
       timeSlot
     });
+
+    await sendServiceRequestEmailToWorker(workerUser.firstname,workerEmail,customerUser.firstname,customerEmail,customerUser.phone,serviceWanted,customerLocation,scheduleDate,timeSlot)
 
     await newRequest.save();
     return res.status(201).json({ message: "Request sent successfully", data: newRequest });
@@ -1188,6 +1168,31 @@ exports.acceptRequest = async (req, res) => {
       { new: true }
     );
     await updateWorkerAvailability(workerId);
+
+    if (workerStatus === "accepted") {
+    const workerName = `${worker.firstname} ${worker.lastname}`;
+    await sendWorkerAcceptedEmail({
+      customerName: request.customerFirstName,
+      customerEmail: request.customerEmail,
+      workerName,
+      serviceWanted: request.serviceWanted,
+      scheduleDate: request.scheduleDate,
+      timeSlot: request.timeSlot,
+      workerEmail: request.workerEmail,
+      workerPhone: request.workerPhoneNumber
+    });
+  }
+
+  if (workerStatus === "rejected") {
+  const workerName = `${worker.firstname} ${worker.lastname}`;
+  await sendWorkerRejectedEmail({
+    customerName: request.customerFirstName,
+    customerEmail: request.customerEmail,
+    workerName,
+    serviceWanted: request.serviceWanted,
+    rejectReason: workerReason,
+  });
+}
 
     res.status(200).json({
       success: true,
