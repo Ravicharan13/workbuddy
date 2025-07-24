@@ -67,10 +67,12 @@ const ForgotPasswordPage = () => {
   }
 
   try {
+    toast.loading("Verifing...")
     const response = await axios.post(`${API_URL}/api/auth/worker/verify-resetcode`, {
       email,
       code: fullCode
     });
+    toast.dismiss();
     toast.success(response.data.message || "Code verified!");
     setStep(3);
   } catch (error) {
@@ -106,6 +108,7 @@ const ForgotPasswordPage = () => {
   }
 
   try {
+    toast.loading("Reseting password...")
     const response = await axios.post(`${API_URL}/auth/worker/reset-password`, {
       email,
       newPassword: password,

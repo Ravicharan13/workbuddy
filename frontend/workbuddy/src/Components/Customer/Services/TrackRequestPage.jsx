@@ -229,7 +229,7 @@ const handleCancelConfirmed = async () => {
       {/* ✅ Confirmation Modal */}
       {cancelId && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-sm shadow-lg max-w-sm w-full">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Confirm Cancellation</h2>
             <p className="text-sm text-gray-700 dark:text-gray-300 mb-6">
               Are you sure you want to cancel this request?
@@ -237,13 +237,13 @@ const handleCancelConfirmed = async () => {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setCancelId(null)}
-                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 text-sm"
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-sm hover:bg-gray-400 text-sm"
               >
                 No
               </button>
               <button
                 onClick={handleCancelConfirmed}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                className="px-4 py-2 bg-red-600 text-white rounded-sm hover:bg-red-700 text-sm"
               >
                 Yes, Cancel
               </button>

@@ -8,7 +8,7 @@ const Request = require("../models/WorkerCustomerRequest")
 const { v4: uuidv4 } = require("uuid");
 const Message = require("../models/Message")
 const updateWorkerAvailability = require("../utils/updateWorkerAvailability")
-const { sendRegistrationEmail, sendCustomerWelcomeEmail } = require("../utils/mailer");
+const { sendRegistrationEmail, sendCustomerWelcomeEmail, sendPasswordChangeEmail } = require("../utils/mailer");
 
 // Generate Access Token
 const generateAccessToken = (user, role) => {
@@ -445,6 +445,9 @@ exports.changePassword = async (req, res) => {
     worker.password = hashedNewPassword;
     await worker.save();
 
+    await sendPasswordChangeEmail(worker.email, worker.firstname);
+
+
     res.status(200).json({ message: 'Password changed successfully' });
   } catch (error) {
     console.error(error);
@@ -792,6 +795,9 @@ exports.changePassword = async (req, res) => {
 
     customer.password = hashedNewPassword;
     await customer.save();
+
+    await sendPasswordChangeEmail(customer.email, customer.firstname);
+
 
     res.status(200).json({ message: 'Password changed successfully' });
   } catch (error) {

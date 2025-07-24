@@ -94,13 +94,14 @@ const handleInputChange = (e) => {
   
   const handleImageSelect = async (imgUrl) => {
   try {
+    toast.loading("Changing...")
     setImage(imgUrl);
-
     const res = await axiosInstance.patch('/api/auth/worker/update-avatar', {
       avatar: imgUrl,
     });
 
     setProfile(prev => ({ ...prev, avatar: imgUrl }));
+    toast.dismiss();
     toast.success("Avatar updated!");
     setShowAvatars(false);
   } catch (err) {
@@ -173,12 +174,14 @@ const handleInputChange = (e) => {
 };
 
   const handleSave = async () => {
+    toast.loading("Saving...")
   try {
     await axiosInstance.patch('/api/auth/worker/update-info', {
       ...info,
       state: selectedState?.value || '',
       city: selectedCity?.value || ''
     });
+    toast.dismiss();
     toast.success("Profile updated!");
     setIsEditing(false);
   } catch (err) {
@@ -271,13 +274,14 @@ const customSelectStyles = (isDark, isEditing) => ({
 
   const handleAddService = async () => {
   if (!serviceInput.trim()) return;
-
+  toast.loading("Adding service...")
   try {
     const res = await axiosInstance.post('/api/auth/worker/services', {
       name: serviceInput
     });
     setServices((prev) => [...prev, res.data]);
     setServiceInput('');
+    toast.dismiss();
     toast.success("Service added!");
   } catch (err) {
     toast.error("Failed to add service");
@@ -287,10 +291,12 @@ const customSelectStyles = (isDark, isEditing) => ({
 
 
   const handleDeleteService = async (serviceId) => {
+    toast.loading("Deleting service...")
   try {
     const res = await axiosInstance.delete(`/api/auth/worker/services/${serviceId}`);
     console.log(res);
     setServices((prev) => prev.filter(service => service._id !== serviceId));
+    toast.dismiss();
     toast.success("Service deleted successfully");
   } catch (error) {
     console.error("Delete service failed:", error);
@@ -320,18 +326,19 @@ const customSelectStyles = (isDark, isEditing) => ({
     toast.error("New and confirm passwords do not match");
     return;
   }
-
+  toast.loading("Password Updating...")
   try {
-    await axiosInstance.patch('/auth/worker/change-password', {
+    await axiosInstance.patch('/api/auth/worker/change-password', {
       currentPassword: formData.currentPassword,
       newPassword: formData.newPassword,
     });
-
+    toast.dismiss();
     toast.success("Password changed successfully");
     setShowPasswordModal(false);
     setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
   } catch (err) {
     console.error(err);
+    toast.dismiss()
     toast.error(err.response?.data?.message || "Failed to change password");
   }
 };

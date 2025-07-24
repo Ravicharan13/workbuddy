@@ -62,12 +62,14 @@ export default function WorkerRequests() {
 
  const handleAccept = async (id) => {
   try {
+    toast.loading("Accepting...")
     const res = await axiosInstance.put("/api/auth/accept", {
         requestId: id,
         workerStatus: "accepted",
       });
 
       if (res.data.success) {
+        toast.dismiss();
         toast.success("Request accepted successfully!");
         setRequests(prev =>
           prev.map(r => r.id === id ? { ...r, status: 'accepted', reason: '' } : r)
@@ -87,6 +89,7 @@ export default function WorkerRequests() {
   if (!reasonInput.trim()) return;
 
   try {
+    toast.loading("Rejecting...")
     const res = await axiosInstance.put("/api/auth/accept", {
       requestId: id,
       workerStatus: 'rejected',
@@ -94,6 +97,7 @@ export default function WorkerRequests() {
     });
 
     if (res.data.success) {
+      toast.dismiss();
       toast.success("Request rejected successfully!");
       setRequests(prev =>
         prev.map(r =>

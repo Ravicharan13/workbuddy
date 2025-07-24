@@ -52,12 +52,13 @@ const ProfilePage = ({ isDark, setIsDark }) => {
     const handleImageSelect = async (imgUrl) => {
   try {
     setImage(imgUrl);
-
+    toast.loading("Changing...")
     await axiosInstance.patch('/api/auth/customer/update-avatar', {
       avatar: imgUrl,
     });
 
     setProfile(prev => ({ ...prev, avatar: imgUrl }));
+    toast.dismiss();
     toast.success("Avatar updated!");
     setShowAvatars(false);
   } catch (err) {
@@ -120,11 +121,13 @@ const ProfilePage = ({ isDark, setIsDark }) => {
 
 const handleSave = async () => {
   try {
+    toast.loading("Saving...")
     await axiosInstance.patch('/api/auth/customer/update-info', {
       ...info,
       state: selectedState?.value || '',
       city: selectedCity?.value || ''
     });
+    toast.dismiss();
     toast.success("Profile updated!");
     setIsEditing(false);
   } catch (err) {
@@ -239,13 +242,13 @@ const formatDateForInput = (isoDate) => {
     toast.error("New and confirm passwords do not match");
     return;
   }
-
+  toast.loading("Password Updating...")
   try {
     await axiosInstance.patch('/api/auth/customer/change-password', {
       currentPassword: formData.currentPassword,
       newPassword: formData.newPassword,
     });
-
+    toast.dismiss();
     toast.success("Password changed successfully");
     setShowPasswordModal(false);
     setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });

@@ -135,7 +135,7 @@ const handleLogin = async (e) => {
     });
 
     toast.dismiss();
-    toast.success("Login successful!");
+    toast.success("Welcome Back!");
 
     const response = await axiosInstance.get("/api/auth/get-require-info", {
       withCredentials: true,
